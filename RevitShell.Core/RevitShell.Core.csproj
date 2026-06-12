@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>RevitShell.Core</RootNamespace>
+    <AssemblyName>RevitShell.Core</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\RevitShell\RevitShell.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+</Project>

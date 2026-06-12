@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>Installer</RootNamespace>
+    <AssemblyName>Installer</AssemblyName>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RevitShell\RevitShell.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ServerRegistrationManager" Version="2.7.2" GeneratePathProperty="true" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(PkgServerRegistrationManager)\lib\net45\ServerRegistrationManager.exe" Link="srm.exe" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
