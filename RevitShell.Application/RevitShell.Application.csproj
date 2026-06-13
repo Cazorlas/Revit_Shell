@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-    <RootNamespace>RevitShell.Core</RootNamespace>
-    <AssemblyName>RevitShell.Core</AssemblyName>
+    <RootNamespace>RevitShell.Application</RootNamespace>
+    <AssemblyName>RevitShell.Application</AssemblyName>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\RevitShell\RevitShell.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="WindowsBase" />
+    <ProjectReference Include="..\RevitShell.Domain\RevitShell.Domain.csproj" />
   </ItemGroup>
 </Project>

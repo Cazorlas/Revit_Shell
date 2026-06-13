@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>RevitShell.Infrastructure</RootNamespace>
+    <AssemblyName>RevitShell.Infrastructure</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\RevitShell\RevitShell.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RevitShell.Domain\RevitShell.Domain.csproj" />
+    <ProjectReference Include="..\RevitShell.Application\RevitShell.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+</Project>

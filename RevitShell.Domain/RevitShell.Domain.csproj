@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>RevitShell.Domain</RootNamespace>
+    <AssemblyName>RevitShell.Domain</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\RevitShell\RevitShell.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+</Project>

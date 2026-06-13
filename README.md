@@ -19,24 +19,33 @@ Features:
 
 ## Architecture
 
-The solution is split into three projects:
+The solution is split into five projects:
 
-- `RevitShell.Core`
-  - Core domain logic for file inspection and version detection.
+- `RevitShell.Domain`
+  - Domain models and shared business concepts.
+  - Contains types such as `RevitInfo`, `RevitFileTypes`, and `RevitInstallationInfo`.
+
+- `RevitShell.Application`
+  - Application-level contracts and use-case services.
+  - Contains interfaces such as `IRevitVersionDetector`, `IRevitFileInspector`, and `IRevitInstallationLocator`.
+  - Contains `RevitFileInspector`, which turns a file path into a normalized `RevitInfo`.
+
+- `RevitShell.Infrastructure`
+  - Technical implementations for file parsing and registry access.
   - Reads Revit metadata from the `BasicFileInfo` structured storage stream.
-  - Uses a fallback text-based detector when needed.
+  - Contains the fallback text detector and the Windows registry-based Revit installation locator.
 
 - `RevitShell`
   - SharpShell-based Explorer extension.
   - Builds `RevitShell.dll`.
-  - Provides the context menu UI and launch behavior.
+  - Provides the context menu UI and file launch behavior.
 
 - `Installer`
   - WiX/WixSharp-based MSI builder.
-  - Packages the shell extension and its runtime dependencies.
+  - Packages the shell extension and all required runtime dependencies.
   - Registers and unregisters the COM shell extension with `srm.exe`.
 
-This separation keeps the version-detection logic, Explorer integration, and installer logic isolated and easier to maintain.
+This keeps domain concepts, application contracts, infrastructure details, Explorer integration, and MSI packaging separated in a cleaner architecture.
 
 ## Tech Stack
 
@@ -97,8 +106,12 @@ Important outputs:
 
 - Shell extension DLL:
   - `RevitShell\bin\Release\net48\RevitShell.dll`
-- Core library:
-  - `RevitShell.Core\bin\Release\net48\RevitShell.Core.dll`
+- Domain library:
+  - `RevitShell.Domain\bin\Release\net48\RevitShell.Domain.dll`
+- Application library:
+  - `RevitShell.Application\bin\Release\net48\RevitShell.Application.dll`
+- Infrastructure library:
+  - `RevitShell.Infrastructure\bin\Release\net48\RevitShell.Infrastructure.dll`
 - MSI builder:
   - `Installer\bin\Release\net48\Installer.exe`
 - MSI package:
@@ -163,7 +176,9 @@ srm.exe uninstall "[INSTALLDIR]RevitShell.dll"
 Revit_Shell/
 |-- Installer/
 |-- RevitShell/
-|-- RevitShell.Core/
+|-- RevitShell.Domain/
+|-- RevitShell.Application/
+|-- RevitShell.Infrastructure/
 |-- sources/
 |-- RevitShell.sln
 |-- README.md
@@ -178,7 +193,7 @@ Revit_Shell/
 
 ## Future Improvements
 
-- Add automated tests for `RevitShell.Core`
+- Add automated tests for `RevitShell.Application` and `RevitShell.Infrastructure`
 - Add structured diagnostics for version-detection failures
 - Replace the runtime PNG resize with a dedicated `.ico`
 - Add CI packaging for MSI release artifacts

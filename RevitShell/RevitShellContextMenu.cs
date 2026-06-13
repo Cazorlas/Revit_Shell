@@ -8,10 +8,13 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using RevitShell.Core;
+using RevitShell.Application;
 
 namespace RevitShell;
 
+/// <summary>
+/// Provides the Explorer context menu for supported Revit files.
+/// </summary>
 [ComVisible(true)]
 [Guid("7C7656C0-A90F-4B96-8B24-86C68A191F14")]
 [COMServerAssociation(AssociationType.ClassOfExtension, ".rvt")]
@@ -20,12 +23,12 @@ namespace RevitShell;
 [COMServerAssociation(AssociationType.ClassOfExtension, ".rte")]
 public class RevitShellContextMenu : SharpContextMenu
 {
-    private static readonly IRevitFileInspector Inspector = new RevitFileInspector(
-        new CompositeRevitVersionDetector(
-            new BasicFileInfoRevitVersionDetector(),
-            new BinaryTextRevitVersionDetector()));
     private static readonly Image MenuIcon = LoadMenuIcon();
 
+    /// <summary>
+    /// Determines whether the context menu should be shown for the current Explorer selection.
+    /// </summary>
+    /// <returns><see langword="true"/> when the selection only contains supported Revit files; otherwise, <see langword="false"/>.</returns>
     protected override bool CanShowMenu()
     {
         var selectedPaths = SelectedItemPaths?.Where(path => !string.IsNullOrWhiteSpace(path)).ToArray();
@@ -34,9 +37,13 @@ public class RevitShellContextMenu : SharpContextMenu
             return false;
         }
 
-        return selectedPaths.All(Inspector.IsSupportedFile);
+        return selectedPaths.All(RevitShellCompositionRoot.FileInspector.IsSupportedFile);
     }
 
+    /// <summary>
+    /// Creates the context menu and attaches command handlers.
+    /// </summary>
+    /// <returns>The populated context menu.</returns>
     protected override ContextMenuStrip CreateMenu()
     {
         var menu = new ContextMenuStrip();
@@ -55,6 +62,9 @@ public class RevitShellContextMenu : SharpContextMenu
         return menu;
     }
 
+    /// <summary>
+    /// Displays the version information dialog for the selected Revit files.
+    /// </summary>
     private void ShowVersionInfo()
     {
         var filePaths = GetSelectedPaths();
@@ -71,12 +81,14 @@ public class RevitShellContextMenu : SharpContextMenu
             MessageBoxIcon.Information);
     }
 
+    /// <summary>
+    /// Attempts to open the selected files with their exact installed Revit versions.
+    /// </summary>
     private void OpenWithExactVersion()
     {
         try
         {
-            var launcher = new RevitFileLauncher(Inspector, new RegistryRevitApplicationLocator());
-            launcher.Open(GetSelectedPaths());
+            RevitShellCompositionRoot.OpenRevitFiles.Execute(GetSelectedPaths());
         }
         catch (Exception ex)
         {
@@ -88,6 +100,10 @@ public class RevitShellContextMenu : SharpContextMenu
         }
     }
 
+    /// <summary>
+    /// Returns the sanitized set of selected Explorer paths.
+    /// </summary>
+    /// <returns>An array of non-empty selected paths.</returns>
     private string[] GetSelectedPaths()
     {
         return SelectedItemPaths?
@@ -96,6 +112,11 @@ public class RevitShellContextMenu : SharpContextMenu
             ?? Array.Empty<string>();
     }
 
+    /// <summary>
+    /// Builds the version information message shown in the dialog.
+    /// </summary>
+    /// <param name="filePaths">The selected Revit file paths.</param>
+    /// <returns>A formatted multi-line message for the selected files.</returns>
     private static string BuildVersionInfoMessage(string[] filePaths)
     {
         var builder = new StringBuilder();
@@ -103,7 +124,7 @@ public class RevitShellContextMenu : SharpContextMenu
         foreach (var filePath in filePaths)
         {
             var fullPath = filePath.Trim('"');
-            var result = Inspector.Inspect(fullPath);
+            var revitInfo = RevitShellCompositionRoot.FileInspector.Inspect(fullPath);
 
             if (builder.Length > 0)
             {
@@ -111,14 +132,18 @@ public class RevitShellContextMenu : SharpContextMenu
                 builder.AppendLine();
             }
 
-            builder.AppendLine($"Name: {Path.GetFileName(fullPath)}");
-            builder.AppendLine($"Path: {fullPath}");
-            builder.Append($"Version: {result.Description}");
+            builder.AppendLine($"Name: {revitInfo.Name}");
+            builder.AppendLine($"Path: {revitInfo.FilePath}");
+            builder.Append($"Version: {revitInfo.VersionText}");
         }
 
         return builder.ToString();
     }
 
+    /// <summary>
+    /// Loads the embedded Autodesk logo used by the context menu items.
+    /// </summary>
+    /// <returns>A 16x16 image for the context menu.</returns>
     private static Image LoadMenuIcon()
     {
         using var stream = Assembly.GetExecutingAssembly()

@@ -12,7 +12,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RevitShell.Core\RevitShell.Core.csproj" />
+    <ProjectReference Include="..\RevitShell.Domain\RevitShell.Domain.csproj" />
+    <ProjectReference Include="..\RevitShell.Application\RevitShell.Application.csproj" />
+    <ProjectReference Include="..\RevitShell.Infrastructure\RevitShell.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
