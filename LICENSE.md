@@ -1,6 +1,6 @@
 # Revit Shell Custom License
 
-Copyright (c) Cazorlas. All rights reserved.
+Copyright (c) PaperEngineer. All rights reserved.
 
 ## Permission
 
@@ -13,7 +13,7 @@ Any use, redistribution, modification, or derivative work of this software must 
 At minimum, the following attribution must be retained:
 
 - `Original project: Revit Shell`
-- `Author/Owner: Cazorlas`
+- `Author/Owner: PaperEngineer`
 
 If the software or derivative work is distributed publicly, the credit should also include a link to the original repository when reasonably possible.
 

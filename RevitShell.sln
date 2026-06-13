@@ -18,6 +18,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{8858F986-55A8-4383-B2B3-1E6DF86E3955}"
 	ProjectSection(SolutionItems) = preProject
 		sources\images\autodesk_logo.png = sources\images\autodesk_logo.png
+		sources\images\Engineer120x120.png = sources\images\Engineer120x120.png
 	EndProjectSection
 EndProject
 Global
