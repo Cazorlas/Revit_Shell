@@ -42,10 +42,15 @@ internal sealed class RevitFileLauncher
                 throw new InvalidOperationException($"Unsupported Revit file: {Path.GetFileName(filePath)}");
             }
 
-            var installation = _applicationLocator.FindBestMatch(result.Version);
+            if (!result.Version.HasValue)
+            {
+                throw new InvalidOperationException($"Could not detect the Revit version for '{Path.GetFileName(filePath)}'.");
+            }
+
+            var installation = _applicationLocator.FindExactMatch(result.Version.Value);
             if (installation == null)
             {
-                throw new InvalidOperationException("No installed Revit version was found on this machine.");
+                throw new InvalidOperationException($"Revit {result.Version.Value} is not installed on this machine.");
             }
 
             Process.Start(new ProcessStartInfo

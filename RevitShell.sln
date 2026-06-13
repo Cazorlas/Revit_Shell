@@ -1,13 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.7.11903.348
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevitShell", "RevitShell\RevitShell.csproj", "{6BE0B272-A708-4F5B-AB82-1C7BB4C5BCC0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevitShell.Core", "RevitShell.Core\RevitShell.Core.csproj", "{80EC8072-9B3D-4286-B96C-976D8E4DE28B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Installer", "Installer\Installer.csproj", "{5276C685-CF47-4A9B-9368-5DDE347DB56B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sources", "sources", "{9869958D-0D53-418C-971A-BF9C42E48DFE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{8858F986-55A8-4383-B2B3-1E6DF86E3955}"
+	ProjectSection(SolutionItems) = preProject
+		sources\images\autodesk_logo.png = sources\images\autodesk_logo.png
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,5 +65,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8858F986-55A8-4383-B2B3-1E6DF86E3955} = {9869958D-0D53-418C-971A-BF9C42E48DFE}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3CEB017C-EFEA-439D-B7F5-0F309CDF3D1B}
 	EndGlobalSection
 EndGlobal

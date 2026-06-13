@@ -9,21 +9,10 @@ internal sealed class RegistryRevitApplicationLocator
 {
     private const string RevitRootKey = @"SOFTWARE\Autodesk\Revit";
 
-    public RevitInstallationInfo? FindBestMatch(int? requestedVersion)
+    public RevitInstallationInfo? FindExactMatch(int requestedVersion)
     {
         var installations = FindInstallations();
-        if (requestedVersion.HasValue)
-        {
-            var exactMatch = installations.FirstOrDefault(item => item.Version == requestedVersion.Value);
-            if (exactMatch != null)
-            {
-                return exactMatch;
-            }
-        }
-
-        return installations
-            .OrderByDescending(item => item.Version)
-            .FirstOrDefault();
+        return installations.FirstOrDefault(item => item.Version == requestedVersion);
     }
 
     private static List<RevitInstallationInfo> FindInstallations()

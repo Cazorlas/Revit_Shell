@@ -1,8 +1,12 @@
 using SharpShell.Attributes;
 using SharpShell.SharpContextMenu;
 using System;
+using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
 using RevitShell.Core;
 
@@ -16,7 +20,11 @@ namespace RevitShell;
 [COMServerAssociation(AssociationType.ClassOfExtension, ".rte")]
 public class RevitShellContextMenu : SharpContextMenu
 {
-    private static readonly IRevitFileInspector Inspector = new RevitFileInspector(new BinaryTextRevitVersionDetector());
+    private static readonly IRevitFileInspector Inspector = new RevitFileInspector(
+        new CompositeRevitVersionDetector(
+            new BasicFileInfoRevitVersionDetector(),
+            new BinaryTextRevitVersionDetector()));
+    private static readonly Image MenuIcon = LoadMenuIcon();
 
     protected override bool CanShowMenu()
     {
@@ -34,9 +42,11 @@ public class RevitShellContextMenu : SharpContextMenu
         var menu = new ContextMenuStrip();
 
         var infoItem = new ToolStripMenuItem("Revit Version Info");
+        infoItem.Image = MenuIcon;
         infoItem.Click += (_, _) => ShowVersionInfo();
 
         var openItem = new ToolStripMenuItem("Open with exact Revit version");
+        openItem.Image = MenuIcon;
         openItem.Click += (_, _) => OpenWithExactVersion();
 
         menu.Items.Add(infoItem);
@@ -48,8 +58,17 @@ public class RevitShellContextMenu : SharpContextMenu
     private void ShowVersionInfo()
     {
         var filePaths = GetSelectedPaths();
-        using var form = new FileInfoForm(filePaths, Inspector);
-        form.ShowDialog();
+        if (filePaths.Length == 0)
+        {
+            return;
+        }
+
+        var message = BuildVersionInfoMessage(filePaths);
+        MessageBox.Show(
+            message,
+            "Revit Version Info",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
     }
 
     private void OpenWithExactVersion()
@@ -75,5 +94,42 @@ public class RevitShellContextMenu : SharpContextMenu
             .Where(path => !string.IsNullOrWhiteSpace(path))
             .ToArray()
             ?? Array.Empty<string>();
+    }
+
+    private static string BuildVersionInfoMessage(string[] filePaths)
+    {
+        var builder = new StringBuilder();
+
+        foreach (var filePath in filePaths)
+        {
+            var fullPath = filePath.Trim('"');
+            var result = Inspector.Inspect(fullPath);
+
+            if (builder.Length > 0)
+            {
+                builder.AppendLine();
+                builder.AppendLine();
+            }
+
+            builder.AppendLine($"Name: {Path.GetFileName(fullPath)}");
+            builder.AppendLine($"Path: {fullPath}");
+            builder.Append($"Version: {result.Description}");
+        }
+
+        return builder.ToString();
+    }
+
+    private static Image LoadMenuIcon()
+    {
+        using var stream = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream("RevitShell.Resources.autodesk_logo.png");
+
+        if (stream == null)
+        {
+            return SystemIcons.Application.ToBitmap();
+        }
+
+        using var sourceImage = Image.FromStream(stream);
+        return new Bitmap(sourceImage, new Size(16, 16));
     }
 }

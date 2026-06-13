@@ -18,4 +18,8 @@
   <ItemGroup>
     <PackageReference Include="SharpShell" Version="2.7.2" />
   </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\sources\images\autodesk_logo.png" Link="Resources\autodesk_logo.png" />
+  </ItemGroup>
 </Project>

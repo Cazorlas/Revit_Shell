@@ -7,75 +7,29 @@ namespace Installer;
 
 internal sealed class SharpShellExtensionInstaller
 {
-    private const string ProductFolderName = "RevitShell";
-    private static readonly string[] RequiredFiles =
+    private const string ServerFileName = "RevitShell.dll";
+    private const string RegistrationManagerFileName = "srm.exe";
+
+    public static void RegisterInstalledFiles(string installDirectory)
     {
-        "RevitShell.dll",
-        "RevitShell.Core.dll",
-        "SharpShell.dll",
-        "srm.exe"
-    };
+        var serverPath = Path.Combine(installDirectory, ServerFileName);
+        var srmPath = Path.Combine(installDirectory, RegistrationManagerFileName);
 
-    public string InstallDirectory => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-        ProductFolderName);
-
-    private string InstalledServerPath => Path.Combine(InstallDirectory, "RevitShell.dll");
-
-    private string SourceDirectory => AppContext.BaseDirectory;
-
-    private string SourceSrmPath => Path.Combine(SourceDirectory, "srm.exe");
-
-    private string InstalledSrmPath => Path.Combine(InstallDirectory, "srm.exe");
-
-    public bool IsInstalled()
-    {
-        return File.Exists(InstalledServerPath);
+        RunSrm(srmPath, "uninstall", serverPath, ignoreExitCode: true);
+        RunSrm(srmPath, "install", serverPath, "-codebase", GetBitnessFlag());
     }
 
-    public void Install()
+    public static void UnregisterInstalledFiles(string installDirectory)
     {
-        RunSrm(SourceSrmPath, "uninstall", InstalledServerPath, ignoreExitCode: true);
+        var serverPath = Path.Combine(installDirectory, ServerFileName);
+        var srmPath = Path.Combine(installDirectory, RegistrationManagerFileName);
 
-        Directory.CreateDirectory(InstallDirectory);
-
-        CopyFiles();
-        RunSrm(SourceSrmPath, "install", InstalledServerPath, "-codebase", GetBitnessFlag());
-    }
-
-    public void Uninstall()
-    {
-        var srmPath = File.Exists(SourceSrmPath) ? SourceSrmPath : InstalledSrmPath;
-        RunSrm(srmPath, "uninstall", InstalledServerPath, ignoreExitCode: true);
-
-        foreach (var fileName in RequiredFiles)
+        if (!File.Exists(serverPath) || !File.Exists(srmPath))
         {
-            var installedFile = Path.Combine(InstallDirectory, fileName);
-            if (File.Exists(installedFile))
-            {
-                File.Delete(installedFile);
-            }
+            return;
         }
 
-        if (Directory.Exists(InstallDirectory) && !Directory.EnumerateFileSystemEntries(InstallDirectory).Any())
-        {
-            Directory.Delete(InstallDirectory);
-        }
-    }
-
-    private void CopyFiles()
-    {
-        foreach (var fileName in RequiredFiles)
-        {
-            var sourceFile = Path.Combine(SourceDirectory, fileName);
-            if (!File.Exists(sourceFile))
-            {
-                throw new FileNotFoundException($"Required installer dependency was not found: {fileName}", sourceFile);
-            }
-
-            var targetFile = Path.Combine(InstallDirectory, fileName);
-            File.Copy(sourceFile, targetFile, true);
-        }
+        RunSrm(srmPath, "uninstall", serverPath, ignoreExitCode: true);
     }
 
     private static void RunSrm(string srmPath, string verb, string serverPath, string option = "", string bitnessOption = "", bool ignoreExitCode = false)

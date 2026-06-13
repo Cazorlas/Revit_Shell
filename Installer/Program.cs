@@ -1,18 +1,142 @@
 using System;
-using System.Windows.Forms;
+using System.IO;
+using System.Linq;
+using WixSharp;
+using WixFile = WixSharp.File;
 
 namespace Installer;
 
 internal static class Program
 {
-    [STAThread]
-    private static void Main()
-    {
-        Application.EnableVisualStyles();
-        Application.SetCompatibleTextRenderingDefault(false);
+    private const string ProductName = "Revit Shell";
+    private const string CompanyName = "Cazorlas";
+    private const string ProductVersion = "1.0.0";
+    private static readonly Guid ProductGuid = new Guid("057A74FC-01F8-49ED-AD21-78BF595F02BC");
 
-        var installer = new SharpShellExtensionInstaller();
-        Application.Run(new InstallerForm(installer));
+    private static int Main(string[] args)
+    {
+        try
+        {
+            var configuration = args.Length > 0 ? args[0] : "Release";
+            var solutionRoot = ResolveSolutionRoot();
+            var payloadDirectory = Path.Combine(solutionRoot, "RevitShell", "bin", configuration, "net48");
+            var srmPath = Path.Combine(AppContext.BaseDirectory, "srm.exe");
+            var outputDirectory = Path.Combine(solutionRoot, "Installer", "bin", configuration, "msi");
+            var srmFile = new WixFile(srmPath)
+            {
+                Id = new Id("SrmExe")
+            };
+
+            var payloadFiles = GetPayloadFiles(payloadDirectory);
+            var installFiles = payloadFiles.Concat(new WixEntity[] { srmFile }).ToArray();
+
+            var project = new Project(
+                ProductName,
+                new InstallDir(@"%ProgramFiles%\RevitShell",
+                    installFiles),
+                new Dir(@"%ProgramMenu%\Cazorlas\Revit Shell",
+                    new ExeFileShortcut(
+                        "Uninstall Revit Shell",
+                        "[System64Folder]msiexec.exe",
+                        "/x [ProductCode]")))
+            {
+                GUID = ProductGuid,
+                Version = new Version(ProductVersion),
+                Platform = Platform.x64,
+                OutDir = outputDirectory,
+                OutFileName = "RevitShell",
+                InstallScope = InstallScope.perMachine,
+                UI = WUI.WixUI_Minimal,
+                MajorUpgrade = MajorUpgrade.Default,
+                ControlPanelInfo =
+                {
+                    Manufacturer = CompanyName,
+                    InstallLocation = "[INSTALLDIR]",
+                    NoModify = true,
+                    NoRepair = true
+                },
+                Actions = new WixSharp.Action[]
+                {
+                    new InstalledFileAction(
+                        "SrmExe",
+                        "install \"[INSTALLDIR]RevitShell.dll\" -codebase -os64",
+                        Return.check,
+                        When.After,
+                        Step.InstallFiles,
+                        Condition.NOT_Installed)
+                    {
+                        Execute = Execute.deferred,
+                        Impersonate = false
+                    },
+                    new InstalledFileAction(
+                        "SrmExe",
+                        "uninstall \"[INSTALLDIR]RevitShell.dll\"",
+                        Return.ignore,
+                        When.Before,
+                        Step.RemoveFiles,
+                        new Condition("REMOVE=\"ALL\""))
+                    {
+                        Execute = Execute.deferred,
+                        Impersonate = false
+                    }
+                }
+            };
+
+            MajorUpgrade.Default.AllowSameVersionUpgrades = true;
+            project.LightOptions += " -sice:ICE30 -sice:ICE60 -sice:ICE61 -sice:ICE80 -sice:ICE91";
+
+            Directory.CreateDirectory(outputDirectory);
+            project.BuildMsi();
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+            return 1;
+        }
+    }
+
+    private static WixEntity[] GetPayloadFiles(string payloadDirectory)
+    {
+        var requiredFiles = Directory
+            .EnumerateFiles(payloadDirectory, "*.dll", SearchOption.TopDirectoryOnly)
+            .Select(path => new WixFile(path)
+            {
+                Id = new Id(BuildFileId(path))
+            })
+            .Cast<WixEntity>()
+            .ToList();
+
+        if (!requiredFiles.Any(file => file is WixFile wixFile && Path.GetFileName(wixFile.Name).Equals("RevitShell.dll", StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new FileNotFoundException("RevitShell.dll was not found in the release output.", Path.Combine(payloadDirectory, "RevitShell.dll"));
+        }
+
+        return requiredFiles.ToArray();
+    }
+
+    private static string BuildFileId(string path)
+    {
+        var fileName = Path.GetFileNameWithoutExtension(path);
+        var sanitized = new string(fileName.Where(char.IsLetterOrDigit).ToArray());
+        return string.IsNullOrWhiteSpace(sanitized) ? "PayloadFile" : sanitized;
+    }
+
+    private static string ResolveSolutionRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (directory != null)
+        {
+            if (System.IO.File.Exists(Path.Combine(directory.FullName, "RevitShell.sln")))
+            {
+                return directory.FullName;
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new DirectoryNotFoundException("Could not find RevitShell.sln from the installer output directory.");
     }
 }
 
