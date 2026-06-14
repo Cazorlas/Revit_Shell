@@ -132,8 +132,8 @@ public class RevitShellContextMenu : SharpContextMenu
                 builder.AppendLine();
             }
 
-            builder.AppendLine($"Name: {revitInfo.Name}");
-            builder.AppendLine($"Path: {revitInfo.FilePath}");
+            builder.AppendLine($"Name: {revitInfo.Name}\n");
+            builder.AppendLine($"Path: {revitInfo.FilePath}\n");
             builder.Append($"Version: {revitInfo.VersionText}");
         }
 
