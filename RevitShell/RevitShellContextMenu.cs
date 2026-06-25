@@ -17,10 +17,7 @@ namespace RevitShell;
 /// </summary>
 [ComVisible(true)]
 [Guid("7C7656C0-A90F-4B96-8B24-86C68A191F14")]
-[COMServerAssociation(AssociationType.ClassOfExtension, ".rvt")]
-[COMServerAssociation(AssociationType.ClassOfExtension, ".rfa")]
-[COMServerAssociation(AssociationType.ClassOfExtension, ".rft")]
-[COMServerAssociation(AssociationType.ClassOfExtension, ".rte")]
+[COMServerAssociation(AssociationType.AllFiles)]
 public class RevitShellContextMenu : SharpContextMenu
 {
     private static readonly Image MenuIcon = LoadMenuIcon();

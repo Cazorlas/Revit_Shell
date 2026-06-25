@@ -14,6 +14,7 @@ internal static class Program
     private const string ProductName = "Revit Shell";
     private const string CompanyName = "PaperEngineer";
     private const string ProductVersion = "1.0.0";
+    private const string ShellExtensionClsid = "{7C7656C0-A90F-4B96-8B24-86C68A191F14}";
     private static readonly Guid ProductGuid = new Guid("057A74FC-01F8-49ED-AD21-78BF595F02BC");
 
     /// <summary>
@@ -65,6 +66,17 @@ internal static class Program
                 BannerImage = bannerImage,
                 BackgroundImage = backgroundImage,
                 MajorUpgrade = MajorUpgrade.Default,
+                RegValues = new[]
+                {
+                    new RegValue(
+                        RegistryHive.LocalMachine,
+                        @"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved",
+                        ShellExtensionClsid,
+                        "Revit Shell Context Menu")
+                    {
+                        Win64 = true
+                    }
+                },
                 ControlPanelInfo =
                 {
                     Manufacturer = CompanyName,

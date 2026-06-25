@@ -149,9 +149,10 @@ What the installer does:
 
 1. Copies the shell extension files into `C:\Program Files\RevitShell`.
 2. Runs `srm.exe install "[INSTALLDIR]RevitShell.dll" -codebase -os64`.
-3. Registers the COM shell extension for supported Revit file types.
+3. Registers the COM shell extension for all files, while the extension only shows its menu for supported Revit file types.
+4. Adds the shell extension CLSID to the Windows approved shell extensions list.
 
-If Explorer does not refresh immediately, restart Explorer after installation.
+If Explorer does not refresh immediately, restart Explorer manually after installation.
 
 ## Uninstall
 
