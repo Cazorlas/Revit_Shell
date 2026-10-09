@@ -13,7 +13,7 @@ internal static class Program
 {
     private const string ProductName = "Revit Shell";
     private const string CompanyName = "PaperEngineer";
-    private const string ProductVersion = "1.0.0";
+    private static readonly Version ProductVersion = ReadProductVersion();
     private const string ShellExtensionClsid = "{7C7656C0-A90F-4B96-8B24-86C68A191F14}";
     private static readonly Guid ProductGuid = new Guid("057A74FC-01F8-49ED-AD21-78BF595F02BC");
     private static readonly (int Year, string TargetFramework)[] AddinTargets =
@@ -68,10 +68,10 @@ internal static class Program
                         "/x [ProductCode]")))
             {
                 GUID = ProductGuid,
-                Version = new Version(ProductVersion),
+                Version = ProductVersion,
                 Platform = Platform.x64,
                 OutDir = outputDirectory,
-                OutFileName = "RevitShell",
+                OutFileName = $"RevitShell_{ProductVersion}",
                 InstallScope = InstallScope.perMachine,
                 UI = WUI.WixUI_Minimal,
                 LicenceFile = licenceFile,
@@ -204,6 +204,16 @@ internal static class Program
                 new WixFile(manifestPath) { Id = new Id($"Addin{target.Year}Manifest") },
                 new Dir("RevitShell", assemblyFiles));
         }).ToArray();
+    }
+
+    /// <summary>
+    /// Reads the product version stamped on this assembly from the <c>Version</c> build property.
+    /// </summary>
+    /// <returns>The three-part product version used for the MSI and its file name.</returns>
+    private static Version ReadProductVersion()
+    {
+        var version = typeof(Program).Assembly.GetName().Version ?? new Version(1, 0, 0);
+        return new Version(version.Major, version.Minor, Math.Max(version.Build, 0));
     }
 
     /// <summary>

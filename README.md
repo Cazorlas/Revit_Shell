@@ -131,7 +131,15 @@ Important outputs:
 - MSI builder:
   - `Installer\bin\Release\net48\Installer.exe`
 - MSI package:
-  - `Installer\bin\Release\msi\RevitShell.msi`
+  - `Installer\bin\Release\msi\RevitShell_<version>.msi`
+
+## Release
+
+Releases are built by GitHub Actions (`.github/workflows/release.yml`):
+
+1. Set the new version in `Directory.Build.props` and add `docs/release-notes/<version>.md`.
+2. Commit, then push a tag with the same version, for example `git tag 1.1.0` and `git push origin 1.1.0`.
+3. The workflow builds the solution in Release, runs the tests, builds `RevitShell_<version>.msi`, and publishes a GitHub release for the tag with the MSI attached and the release notes as its text.
 
 ## MSI Packaging
 
@@ -144,7 +152,7 @@ During a Release build:
 3. `Installer.exe` scans `RevitShell\bin\Release\net48`.
 4. It packages all DLLs from that folder plus `srm.exe`.
 5. It packages the Revit add-in for each year from 2021 through 2027, using `net48` for 2021-2024, `net8.0-windows` for 2025-2026, and `net10.0-windows` for 2027.
-6. It generates `RevitShell.msi`. A missing add-in manifest or DLL fails the MSI build with the source path in the error.
+6. It generates `RevitShell_<version>.msi`, where `<version>` is the `Version` property in `Directory.Build.props`. A missing add-in manifest or DLL fails the MSI build with the source path in the error.
 
 Install location:
 
@@ -163,7 +171,7 @@ The MSI also creates a Start Menu shortcut:
 Run the generated MSI as administrator:
 
 ```powershell
-msiexec /i "D:\Repository\Cazorlas\Revit_Shell\Installer\bin\Release\msi\RevitShell.msi"
+msiexec /i "D:\Repository\Cazorlas\Revit_Shell\Installer\bin\Release\msi\RevitShell_<version>.msi"
 ```
 
 What the installer does:
@@ -184,7 +192,7 @@ You can uninstall in either of these ways:
 - Command line:
 
 ```powershell
-msiexec /x "D:\Repository\Cazorlas\Revit_Shell\Installer\bin\Release\msi\RevitShell.msi"
+msiexec /x "D:\Repository\Cazorlas\Revit_Shell\Installer\bin\Release\msi\RevitShell_<version>.msi"
 ```
 
 During uninstall, the MSI runs:

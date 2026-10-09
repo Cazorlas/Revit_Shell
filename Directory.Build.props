@@ -2,5 +2,7 @@
   <PropertyGroup>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <!-- Product version for every assembly and the MSI. The release workflow overrides it from the git tag. -->
+    <Version>1.1.0</Version>
   </PropertyGroup>
 </Project>

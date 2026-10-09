@@ -1,0 +1,46 @@
+name: Release
+
+# Push a tag such as 1.1.0 (same style as the existing 1.0.0 tag) to build the MSI and publish a GitHub release.
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore RevitShell.sln
+
+      - name: Build (Release also builds the MSI)
+        run: dotnet build RevitShell.sln -c Release --no-restore -p:Version=${{ github.ref_name }}
+
+      - name: Test
+        run: dotnet test RevitShell.Tests/RevitShell.Tests.csproj -c Release --no-build
+
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = '${{ github.ref_name }}'
+          $msi = "Installer/bin/Release/msi/RevitShell_$tag.msi"
+          if (-not (Test-Path $msi)) { throw "MSI not found: $msi" }
+          $notes = "docs/release-notes/$tag.md"
+          if (Test-Path $notes) {
+            gh release create $tag $msi --title $tag --notes-file $notes
+          } else {
+            gh release create $tag $msi --title $tag --generate-notes
+          }
