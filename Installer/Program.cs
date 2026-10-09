@@ -18,6 +18,13 @@ internal static class Program
     private static readonly Guid ProductGuid = new Guid("057A74FC-01F8-49ED-AD21-78BF595F02BC");
     private static readonly (int Year, string TargetFramework)[] AddinTargets =
     {
+        (2014, "net48"),
+        (2015, "net48"),
+        (2016, "net48"),
+        (2017, "net48"),
+        (2018, "net48"),
+        (2019, "net48"),
+        (2020, "net48"),
         (2021, "net48"),
         (2022, "net48"),
         (2023, "net48"),

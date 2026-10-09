@@ -19,7 +19,7 @@ Features:
   - Does not fall back to another installed version.
   - For workshared files, asks whether to `Detach from central`, `Create new local`, `Open directly`, or `Cancel`.
   - `Create new local` writes `Documents\<model>_<Revit username>.rvt` and renames an existing file with a `_backup_<yyyyMMdd-HHmmss>` suffix.
-  - Detach and Create new local use the bundled Revit add-in for Revit 2021-2027. The add-in is unsigned: choose `Always Load` in Revit's security prompt, otherwise Revit asks again on every start.
+  - Detach and Create new local use the bundled Revit add-in for Revit 2014-2027. The add-in is unsigned: choose `Always Load` in Revit's security prompt, otherwise Revit asks again on every start.
 
 ## Architecture
 
@@ -46,7 +46,7 @@ The solution is split into seven projects:
 
 - `RevitShell.RevitAddin`
   - Handles Explorer requests to detach workshared models or create a new local inside Revit.
-  - Builds for the runtimes used by Revit 2021-2027.
+  - Builds for the runtimes used by Revit 2014-2027.
 
 - `RevitShell.Tests`
   - Automated tests for file inspection and workshared open behavior.
@@ -108,7 +108,7 @@ Behavior:
 - If the file is Revit 2024 but only Revit 2023 is installed, the command shows an error instead of launching Revit 2023.
 - For workshared files, choose `Detach from central`, `Create new local`, `Open directly`, or `Cancel`.
 - `Create new local` saves to `Documents\<model>_<Revit username>.rvt`. If that file exists, it is renamed with a `_backup_<yyyyMMdd-HHmmss>` suffix before the new local is created.
-- Detach and Create new local require the bundled add-in, supported in Revit 2021-2027. The add-in is unsigned: choose `Always Load` in Revit's security prompt (`Load Once` asks again on every start).
+- Detach and Create new local require the bundled add-in, supported in Revit 2014-2027. The add-in is unsigned: choose `Always Load` in Revit's security prompt (`Load Once` asks again on every start).
 
 ## Build
 
@@ -151,7 +151,7 @@ During a Release build:
 2. The project automatically runs `Installer.exe`.
 3. `Installer.exe` scans `RevitShell\bin\Release\net48`.
 4. It packages all DLLs from that folder plus `srm.exe`.
-5. It packages the Revit add-in for each year from 2021 through 2027, using `net48` for 2021-2024, `net8.0-windows` for 2025-2026, and `net10.0-windows` for 2027.
+5. It packages the Revit add-in for each year from 2014 through 2027, using `net48` for 2014-2024, `net8.0-windows` for 2025-2026, and `net10.0-windows` for 2027.
 6. It generates `PaperEngineerShell_<version>.msi`, where `<version>` is the `Version` property in `Directory.Build.props`. A missing add-in manifest or DLL fails the MSI build with the source path in the error.
 
 Install location:
