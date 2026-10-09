@@ -32,6 +32,8 @@ internal static class RevitShellCompositionRoot
         return new OpenRevitFilesUseCase(
             FileInspector,
             new RegistryRevitInstallationLocator(),
-            new ProcessRevitApplicationLauncher());
+            new ProcessRevitApplicationLauncher(),
+            new WorksharedOpenDialog(),
+            new ProgramDataRevitAddinLocator());
     }
 }
