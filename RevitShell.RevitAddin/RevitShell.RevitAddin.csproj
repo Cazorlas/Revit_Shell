@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net48;net8.0-windows;net10.0-windows</TargetFrameworks>
+    <RootNamespace>RevitShell.RevitAddin</RootNamespace>
+    <AssemblyName>RevitShell.RevitAddin</AssemblyName>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseWindowsForms>false</UseWindowsForms>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <!-- Compile against the oldest Revit API of each runtime family:
+       net48 -> Revit 2021-2024, net8.0-windows -> Revit 2025-2026, net10.0-windows -> Revit 2027. -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2021.1.50" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2021.1.50" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2025.4.60" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2025.4.60" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2027.0.10" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2027.0.10" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

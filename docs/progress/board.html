@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revit Shell Progress</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1f1d1a; --muted:#6b665e; --card:#ffffff; --line:#e4e0d8; --ok:#2f7d4f; --wait:#9a6b12; --todo:#6b665e; --bad:#b23b3b; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#171614; --fg:#ece8e1; --muted:#a39d93; --card:#211f1c; --line:#35322d; --ok:#6fc28f; --wait:#e0b45a; --todo:#a39d93; --bad:#e57b7b; } }
+:root[data-theme="dark"] { --bg:#171614; --fg:#ece8e1; --muted:#a39d93; --card:#211f1c; --line:#35322d; --ok:#6fc28f; --wait:#e0b45a; --todo:#a39d93; --bad:#e57b7b; }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, "Segoe UI", sans-serif; }
+main { max-width:860px; margin:0 auto; padding:24px 16px 48px; }
+h1 { font-size:22px; margin:0 0 4px; }
+.sub { color:var(--muted); margin:0 0 24px; }
+section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+h2 { font-size:17px; margin:0 0 4px; }
+.meta { color:var(--muted); font-size:13px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:14px; }
+th, td { text-align:left; padding:6px 8px; border-top:1px solid var(--line); vertical-align:top; }
+th { color:var(--muted); font-weight:600; border-top:none; }
+.s { font-weight:600; white-space:nowrap; }
+.done { color:var(--ok); } .run { color:var(--wait); } .todo { color:var(--todo); } .fail { color:var(--bad); }
+code { font-size:13px; }
+@media (max-width:600px) { td:nth-child(3), th:nth-child(3) { display:none; } }
+</style>
+</head>
+<body>
+<main>
+<h1>Revit Shell — tiến độ</h1>
+<p class="sub">Mỗi việc mới thêm ở trên cùng.</p>
+
+<section>
+<h2>Mở file workshared: Detach / Create Local / Mở trực tiếp</h2>
+<div class="meta">Bắt đầu 2026-10-09 · nhánh <code>collab/main/workshared-open</code> · phiên collab 20261009-120830-workshared-open</div>
+<table>
+<thead><tr><th>Bước</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead>
+<tbody>
+<tr><td>Kế hoạch + khung project (test, add-in)</td><td class="s done">xong</td><td>Đọc BasicFileInfo thật: Central/Local/Not enabled; Revit 2027 = net10</td></tr>
+<tr><td>T1 Nhận diện worksharing + Version Info + test</td><td class="s todo">chờ</td><td></td></tr>
+<tr><td>T2 Hộp thoại chọn cách mở + use case + launcher</td><td class="s todo">chờ</td><td></td></tr>
+<tr><td>T3 Add-in Revit (net48 / net8 / net10)</td><td class="s todo">chờ</td><td></td></tr>
+<tr><td>T4 Installer + README + dọn UpgradeLog.htm</td><td class="s todo">chờ</td><td></td></tr>
+<tr><td>Kiểm thử thật trên Revit 2024</td><td class="s todo">chờ</td><td></td></tr>
+<tr><td>Review cuối + dọn dẹp</td><td class="s todo">chờ</td><td></td></tr>
+</tbody>
+</table>
+</section>
+</main>
+</body>
+</html>
