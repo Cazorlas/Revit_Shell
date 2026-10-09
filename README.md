@@ -2,7 +2,7 @@
 
 PaperEngineer Shell (formerly Revit Shell) is a Windows Explorer context menu extension for Revit files. The source projects keep their `RevitShell.*` names.
 
-It adds two commands for these file types:
+It adds three commands for these file types:
 
 - `.rvt`
 - `.rfa`
@@ -20,6 +20,9 @@ Features:
   - For workshared files, asks whether to `Detach from central`, `Create new local`, `Open directly`, or `Cancel`.
   - `Create new local` writes `Documents\<model>_<Revit username>.rvt` and renames an existing file with a `_backup_<yyyyMMdd-HHmmss>` suffix.
   - Detach and Create new local use the bundled Revit add-in for Revit 2014-2027. The add-in is unsigned: choose `Always Load` in Revit's security prompt, otherwise Revit asks again on every start.
+
+- `Check for updates`
+  - Checks GitHub Releases for a newer PaperEngineer Shell version.
 
 ## Architecture
 
@@ -109,6 +112,16 @@ Behavior:
 - For workshared files, choose `Detach from central`, `Create new local`, `Open directly`, or `Cancel`.
 - `Create new local` saves to `Documents\<model>_<Revit username>.rvt`. If that file exists, it is renamed with a `_backup_<yyyyMMdd-HHmmss>` suffix before the new local is created.
 - Detach and Create new local require the bundled add-in, supported in Revit 2014-2027. The add-in is unsigned: choose `Always Load` in Revit's security prompt (`Load Once` asks again on every start).
+
+## Updates
+
+`Check for updates` checks [GitHub Releases](https://github.com/Cazorlas/Revit_Shell/releases/latest) at once. After a command, the extension checks in the background at most once every 24 hours.
+
+The prompt offers `Update now`, `Skip this version` and `Later`. A skipped version is offered again only by a manual check, or when a newer one appears.
+
+The MSI is downloaded to `%TEMP%\PaperEngineerShell\Updates`, and its SHA-256 is checked against the digest GitHub publishes for the asset before `msiexec /i <msi> /passive /norestart` starts. Windows asks for administrator rights and may ask to close File Explorer.
+
+State is kept in `HKCU\Software\PaperEngineer\Shell` (`LastCheckUtc`, `SkippedVersion`).
 
 ## Build
 
