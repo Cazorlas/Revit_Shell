@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <Compile Include="..\RevitShell.RevitAddin\Requests\*.cs" LinkBase="AddinRequests" />
+    <None Include="Updates\latest-release.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
