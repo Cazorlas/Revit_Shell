@@ -84,7 +84,16 @@ public class RevitShellContextMenu : SharpContextMenu
     {
         try
         {
-            RevitShellCompositionRoot.OpenRevitFiles.Execute(GetSelectedPaths());
+            var result = RevitShellCompositionRoot.OpenRevitFiles.Execute(GetSelectedPaths());
+            if (result.Failures.Count > 0)
+            {
+                MessageBox.Show(
+                    string.Join(Environment.NewLine, result.Failures.Select(failure =>
+                        $"{Path.GetFileName(failure.FilePath)}: {failure.Message}")),
+                    "Open with exact Revit version",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
         catch (Exception ex)
         {
