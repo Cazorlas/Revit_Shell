@@ -16,6 +16,16 @@ internal static class Program
     private const string ProductVersion = "1.0.0";
     private const string ShellExtensionClsid = "{7C7656C0-A90F-4B96-8B24-86C68A191F14}";
     private static readonly Guid ProductGuid = new Guid("057A74FC-01F8-49ED-AD21-78BF595F02BC");
+    private static readonly (int Year, string TargetFramework)[] AddinTargets =
+    {
+        (2021, "net48"),
+        (2022, "net48"),
+        (2023, "net48"),
+        (2024, "net48"),
+        (2025, "net8.0-windows"),
+        (2026, "net8.0-windows"),
+        (2027, "net10.0-windows")
+    };
 
     /// <summary>
     /// Builds the MSI package for the requested configuration.
@@ -49,6 +59,8 @@ internal static class Program
                 ProductName,
                 new InstallDir(@"%ProgramFiles%\RevitShell",
                     installFiles),
+                new Dir(@"%CommonAppDataFolder%\Autodesk\Revit\Addins",
+                    GetAddinDirectories(solutionRoot, configuration)),
                 new Dir(@"%ProgramMenu%\PaperEngineer\Revit Shell",
                     new ExeFileShortcut(
                         "Uninstall Revit Shell",
@@ -159,6 +171,39 @@ internal static class Program
         var fileName = Path.GetFileNameWithoutExtension(path);
         var sanitized = new string(fileName.Where(char.IsLetterOrDigit).ToArray());
         return string.IsNullOrWhiteSpace(sanitized) ? "PayloadFile" : sanitized;
+    }
+
+    private static WixEntity[] GetAddinDirectories(string solutionRoot, string configuration)
+    {
+        return AddinTargets.Select(target =>
+        {
+            var sourceDirectory = Path.Combine(solutionRoot, "RevitShell.RevitAddin", "bin", configuration, target.TargetFramework);
+            var manifestPath = Path.Combine(sourceDirectory, "RevitShell.OpenHelper.addin");
+            var assemblyPath = Path.Combine(sourceDirectory, "RevitShell.RevitAddin.dll");
+
+            foreach (var path in new[] { manifestPath, assemblyPath })
+            {
+                if (!System.IO.File.Exists(path))
+                {
+                    throw new FileNotFoundException($"Revit {target.Year} add-in payload was not found in the {configuration} output: {path}", path);
+                }
+            }
+
+            var assemblyFiles = new[] { assemblyPath }
+                .Concat(new[] { "RevitShell.RevitAddin.deps.json", "RevitShell.RevitAddin.runtimeconfig.json" }
+                    .Select(name => Path.Combine(sourceDirectory, name))
+                    .Where(System.IO.File.Exists))
+                .Select(path => new WixFile(path)
+                {
+                    Id = new Id($"Addin{target.Year}{BuildFileId(path)}")
+                })
+                .Cast<WixEntity>()
+                .ToArray();
+
+            return (WixEntity)new Dir(target.Year.ToString(),
+                new WixFile(manifestPath) { Id = new Id($"Addin{target.Year}Manifest") },
+                new Dir("RevitShell", assemblyFiles));
+        }).ToArray();
     }
 
     /// <summary>

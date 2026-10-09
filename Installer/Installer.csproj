@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RevitShell\RevitShell.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\RevitShell.RevitAddin\RevitShell.RevitAddin.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

@@ -13,13 +13,17 @@ Features:
 
 - `Revit Version Info`
   - Shows the file name, full path, and detected Revit version.
+  - Detects whether a workshared model is Central or Local.
 - `Open with exact Revit version`
   - Opens the file only when the matching Revit version is installed.
   - Does not fall back to another installed version.
+  - For workshared files, asks whether to `Detach from central`, `Create new local`, `Open directly`, or `Cancel`.
+  - `Create new local` writes `Documents\<model>_<Revit username>.rvt` and renames an existing file with a `_backup_<yyyyMMdd-HHmmss>` suffix.
+  - Detach and Create new local use the bundled Revit add-in for Revit 2021-2027. Revit asks once to load the unsigned add-in.
 
 ## Architecture
 
-The solution is split into five projects:
+The solution is split into seven projects:
 
 - `RevitShell.Domain`
   - Domain models and shared business concepts.
@@ -40,9 +44,17 @@ The solution is split into five projects:
   - Builds `RevitShell.dll`.
   - Provides the context menu UI and file launch behavior.
 
+- `RevitShell.RevitAddin`
+  - Handles Explorer requests to detach workshared models or create a new local inside Revit.
+  - Builds for the runtimes used by Revit 2021-2027.
+
+- `RevitShell.Tests`
+  - Automated tests for file inspection and workshared open behavior.
+
 - `Installer`
   - WiX/WixSharp-based MSI builder.
   - Packages the shell extension and all required runtime dependencies.
+  - Installs the Revit add-in manifest and payload for each supported Revit year.
   - Registers and unregisters the COM shell extension with `srm.exe`.
 
 This keeps domain concepts, application contracts, infrastructure details, Explorer integration, and MSI packaging separated in a cleaner architecture.
@@ -85,6 +97,7 @@ Displays:
 - `Name`
 - `Path`
 - `Version`
+- Central/Local status for workshared models.
 
 ### Open with exact Revit version
 
@@ -93,6 +106,9 @@ Behavior:
 - If the file version is detected and the exact matching Revit version is installed, the file is opened with that `Revit.exe`.
 - If the version cannot be detected, an error is shown.
 - If the file is Revit 2024 but only Revit 2023 is installed, the command shows an error instead of launching Revit 2023.
+- For workshared files, choose `Detach from central`, `Create new local`, `Open directly`, or `Cancel`.
+- `Create new local` saves to `Documents\<model>_<Revit username>.rvt`. If that file exists, it is renamed with a `_backup_<yyyyMMdd-HHmmss>` suffix before the new local is created.
+- Detach and Create new local require the bundled add-in, supported in Revit 2021-2027. Accept Revit's one-time prompt to load the unsigned add-in.
 
 ## Build
 
@@ -127,11 +143,16 @@ During a Release build:
 2. The project automatically runs `Installer.exe`.
 3. `Installer.exe` scans `RevitShell\bin\Release\net48`.
 4. It packages all DLLs from that folder plus `srm.exe`.
-5. It generates `RevitShell.msi`.
+5. It packages the Revit add-in for each year from 2021 through 2027, using `net48` for 2021-2024, `net8.0-windows` for 2025-2026, and `net10.0-windows` for 2027.
+6. It generates `RevitShell.msi`. A missing add-in manifest or DLL fails the MSI build with the source path in the error.
 
 Install location:
 
 - `C:\Program Files\RevitShell`
+- `%ProgramData%\Autodesk\Revit\Addins\<year>\RevitShell.OpenHelper.addin`
+- `%ProgramData%\Autodesk\Revit\Addins\<year>\RevitShell\RevitShell.RevitAddin.dll` (plus `.deps.json` and `.runtimeconfig.json` when present in the build output)
+
+The manifest points to `RevitShell\RevitShell.RevitAddin.dll` relative to its year folder.
 
 The MSI also creates a Start Menu shortcut:
 
@@ -151,6 +172,7 @@ What the installer does:
 2. Runs `srm.exe install "[INSTALLDIR]RevitShell.dll" -codebase -os64`.
 3. Registers the COM shell extension for all files, while the extension only shows its menu for supported Revit file types.
 4. Adds the shell extension CLSID to the Windows approved shell extensions list.
+5. Copies the bundled Revit add-in into each supported year's add-in folder.
 
 If Explorer does not refresh immediately, restart Explorer manually after installation.
 
@@ -171,6 +193,8 @@ During uninstall, the MSI runs:
 srm.exe uninstall "[INSTALLDIR]RevitShell.dll"
 ```
 
+The MSI also removes the installed Revit add-in manifests and payload files.
+
 ## Repository Layout
 
 ```text
@@ -180,6 +204,8 @@ Revit_Shell/
 |-- RevitShell.Domain/
 |-- RevitShell.Application/
 |-- RevitShell.Infrastructure/
+|-- RevitShell.RevitAddin/
+|-- RevitShell.Tests/
 |-- sources/
 |-- RevitShell.sln
 |-- README.md
@@ -194,7 +220,6 @@ Revit_Shell/
 
 ## Future Improvements
 
-- Add automated tests for `RevitShell.Application` and `RevitShell.Infrastructure`
 - Add structured diagnostics for version-detection failures
 - Replace the runtime PNG resize with a dedicated `.ico`
 - Add CI packaging for MSI release artifacts
