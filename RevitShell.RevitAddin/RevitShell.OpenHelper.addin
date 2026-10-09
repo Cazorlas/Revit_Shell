@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Revit Shell Open Helper</Name>
+    <Assembly>RevitShell\RevitShell.RevitAddin.dll</Assembly>
+    <AddInId>4F1C6B2E-8D3A-4E7B-9C21-5A6D0E8B7F34</AddInId>
+    <FullClassName>RevitShell.RevitAddin.OpenRequestApplication</FullClassName>
+    <VendorId>PaperEngineer</VendorId>
+    <VendorDescription>PaperEngineer</VendorDescription>
+  </AddIn>
+</RevitAddIns>
