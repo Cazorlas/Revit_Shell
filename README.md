@@ -19,7 +19,7 @@ Features:
   - Does not fall back to another installed version.
   - For workshared files, asks whether to `Detach from central`, `Create new local`, `Open directly`, or `Cancel`.
   - `Create new local` writes `Documents\<model>_<Revit username>.rvt` and renames an existing file with a `_backup_<yyyyMMdd-HHmmss>` suffix.
-  - Detach and Create new local use the bundled Revit add-in for Revit 2021-2027. Revit asks once to load the unsigned add-in.
+  - Detach and Create new local use the bundled Revit add-in for Revit 2021-2027. The add-in is unsigned: choose `Always Load` in Revit's security prompt, otherwise Revit asks again on every start.
 
 ## Architecture
 
@@ -108,7 +108,7 @@ Behavior:
 - If the file is Revit 2024 but only Revit 2023 is installed, the command shows an error instead of launching Revit 2023.
 - For workshared files, choose `Detach from central`, `Create new local`, `Open directly`, or `Cancel`.
 - `Create new local` saves to `Documents\<model>_<Revit username>.rvt`. If that file exists, it is renamed with a `_backup_<yyyyMMdd-HHmmss>` suffix before the new local is created.
-- Detach and Create new local require the bundled add-in, supported in Revit 2021-2027. Accept Revit's one-time prompt to load the unsigned add-in.
+- Detach and Create new local require the bundled add-in, supported in Revit 2021-2027. The add-in is unsigned: choose `Always Load` in Revit's security prompt (`Load Once` asks again on every start).
 
 ## Build
 
