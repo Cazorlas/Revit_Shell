@@ -23,7 +23,8 @@ internal static class RevitShellCompositionRoot
         return new RevitFileInspector(
             new CompositeRevitVersionDetector(
                 new BasicFileInfoRevitVersionDetector(),
-                new BinaryTextRevitVersionDetector()));
+                new BinaryTextRevitVersionDetector()),
+            new BasicFileInfoWorksharingDetector());
     }
 
     private static OpenRevitFilesUseCase CreateOpenRevitFilesUseCase()

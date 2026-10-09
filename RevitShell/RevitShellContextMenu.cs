@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 using RevitShell.Application;
 
@@ -116,25 +115,8 @@ public class RevitShellContextMenu : SharpContextMenu
     /// <returns>A formatted multi-line message for the selected files.</returns>
     private static string BuildVersionInfoMessage(string[] filePaths)
     {
-        var builder = new StringBuilder();
-
-        foreach (var filePath in filePaths)
-        {
-            var fullPath = filePath.Trim('"');
-            var revitInfo = RevitShellCompositionRoot.FileInspector.Inspect(fullPath);
-
-            if (builder.Length > 0)
-            {
-                builder.AppendLine();
-                builder.AppendLine();
-            }
-
-            builder.AppendLine($"Name: {revitInfo.Name}\n");
-            builder.AppendLine($"Path: {revitInfo.FilePath}\n");
-            builder.Append($"Version: {revitInfo.VersionText}");
-        }
-
-        return builder.ToString();
+        return RevitVersionInfoFormatter.Build(filePaths.Select(filePath =>
+            RevitShellCompositionRoot.FileInspector.Inspect(filePath.Trim('"'))));
     }
 
     /// <summary>

@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.IO.Packaging;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,7 +11,6 @@ namespace RevitShell.Infrastructure;
 /// </summary>
 public sealed class BasicFileInfoRevitVersionDetector : IRevitVersionDetector
 {
-    private const string StreamName = "BasicFileInfo";
     private static readonly byte[] VersionMarker = { 0x04, 0x00, 0x00, 0x00 };
     private static readonly Encoding UnicodeEncoding = Encoding.Unicode;
     private static readonly Regex FormatRegex = new Regex(@"^Format:.*?(\d{4})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -24,12 +21,12 @@ public sealed class BasicFileInfoRevitVersionDetector : IRevitVersionDetector
     {
         try
         {
-            if (!TryGetRawBasicFileInfo(path, out var rawData))
+            if (!BasicFileInfoStream.TryGetRawBasicFileInfo(path, out var rawData))
             {
                 return null;
             }
 
-            return TryExtractVersion(rawData);
+            return BasicFileInfoText.Parse(rawData).Version ?? TryExtractVersion(rawData);
         }
         catch
         {
@@ -95,38 +92,6 @@ public sealed class BasicFileInfoRevitVersionDetector : IRevitVersionDetector
         }
 
         return false;
-    }
-
-    /// <summary>
-    /// Reads the raw <c>BasicFileInfo</c> stream bytes from the file.
-    /// </summary>
-    /// <param name="path">The Revit file path.</param>
-    /// <param name="rawData">When successful, receives the raw stream bytes.</param>
-    /// <returns><see langword="true"/> when the stream is read; otherwise, <see langword="false"/>.</returns>
-    private static bool TryGetRawBasicFileInfo(string path, out byte[] rawData)
-    {
-        rawData = Array.Empty<byte>();
-
-        if (!StructuredStorageUtils.IsFileStructuredStorage(path, false))
-        {
-            return false;
-        }
-
-        using (var storageRoot = new StructuredStorageRoot(path))
-        {
-            if (!storageRoot.BaseRoot.StreamExists(StreamName))
-            {
-                return false;
-            }
-
-            var streamInfo = storageRoot.BaseRoot.GetStreamInfo(StreamName);
-            using (var stream = streamInfo.GetStream(FileMode.Open, FileAccess.Read))
-            {
-                rawData = new byte[stream.Length];
-                stream.Read(rawData, 0, rawData.Length);
-                return true;
-            }
-        }
     }
 
     /// <summary>
