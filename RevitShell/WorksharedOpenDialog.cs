@@ -74,7 +74,7 @@ public sealed class WorksharedOpenDialog : Form, IWorksharedOpenPrompt
             Text = text,
             AutoSize = true,
             MinimumSize = new Size(300, 32),
-            Dock = DockStyle.Fill,
+            Anchor = AnchorStyles.Left | AnchorStyles.Right,
             Margin = new Padding(0, 4, 0, 0)
         };
         button.Click += (_, _) =>
