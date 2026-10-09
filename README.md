@@ -1,6 +1,6 @@
-# Revit Shell
+# PaperEngineer Shell
 
-Revit Shell is a Windows Explorer context menu extension for Revit files.
+PaperEngineer Shell (formerly Revit Shell) is a Windows Explorer context menu extension for Revit files. The source projects keep their `RevitShell.*` names.
 
 It adds two commands for these file types:
 
@@ -131,7 +131,7 @@ Important outputs:
 - MSI builder:
   - `Installer\bin\Release\net48\Installer.exe`
 - MSI package:
-  - `Installer\bin\Release\msi\RevitShell_<version>.msi`
+  - `Installer\bin\Release\msi\PaperEngineerShell_<version>.msi`
 
 ## Release
 
@@ -139,7 +139,7 @@ Releases are built by GitHub Actions (`.github/workflows/release.yml`):
 
 1. Set the new version in `Directory.Build.props` and add `docs/release-notes/<version>.md`.
 2. Commit, then push a tag with the same version, for example `git tag 1.1.0` and `git push origin 1.1.0`.
-3. The workflow builds the solution in Release, runs the tests, builds `RevitShell_<version>.msi`, and publishes a GitHub release for the tag with the MSI attached and the release notes as its text.
+3. The workflow builds the solution in Release, runs the tests, builds `PaperEngineerShell_<version>.msi`, and publishes a GitHub release for the tag with the MSI attached and the release notes as its text.
 
 ## MSI Packaging
 
@@ -152,11 +152,11 @@ During a Release build:
 3. `Installer.exe` scans `RevitShell\bin\Release\net48`.
 4. It packages all DLLs from that folder plus `srm.exe`.
 5. It packages the Revit add-in for each year from 2021 through 2027, using `net48` for 2021-2024, `net8.0-windows` for 2025-2026, and `net10.0-windows` for 2027.
-6. It generates `RevitShell_<version>.msi`, where `<version>` is the `Version` property in `Directory.Build.props`. A missing add-in manifest or DLL fails the MSI build with the source path in the error.
+6. It generates `PaperEngineerShell_<version>.msi`, where `<version>` is the `Version` property in `Directory.Build.props`. A missing add-in manifest or DLL fails the MSI build with the source path in the error.
 
 Install location:
 
-- `C:\Program Files\RevitShell`
+- `C:\Program Files\PaperEngineer\Shell`
 - `%ProgramData%\Autodesk\Revit\Addins\<year>\RevitShell.OpenHelper.addin`
 - `%ProgramData%\Autodesk\Revit\Addins\<year>\RevitShell\RevitShell.RevitAddin.dll` (plus `.deps.json` and `.runtimeconfig.json` when present in the build output)
 
@@ -164,19 +164,19 @@ The manifest points to `RevitShell\RevitShell.RevitAddin.dll` relative to its ye
 
 The MSI also creates a Start Menu shortcut:
 
-- `Uninstall Revit Shell`
+- `Uninstall PaperEngineer Shell`
 
 ## Install
 
 Run the generated MSI as administrator:
 
 ```powershell
-msiexec /i "D:\Repository\Cazorlas\Revit_Shell\Installer\bin\Release\msi\RevitShell_<version>.msi"
+msiexec /i "D:\Repository\Cazorlas\Revit_Shell\Installer\bin\Release\msi\PaperEngineerShell_<version>.msi"
 ```
 
 What the installer does:
 
-1. Copies the shell extension files into `C:\Program Files\RevitShell`.
+1. Copies the shell extension files into `C:\Program Files\PaperEngineer\Shell`.
 2. Runs `srm.exe install "[INSTALLDIR]RevitShell.dll" -codebase -os64`.
 3. Registers the COM shell extension for all files, while the extension only shows its menu for supported Revit file types.
 4. Adds the shell extension CLSID to the Windows approved shell extensions list.
@@ -188,11 +188,11 @@ If Explorer does not refresh immediately, restart Explorer manually after instal
 
 You can uninstall in either of these ways:
 
-- Start Menu > `Uninstall Revit Shell`
+- Start Menu > `Uninstall PaperEngineer Shell`
 - Command line:
 
 ```powershell
-msiexec /x "D:\Repository\Cazorlas\Revit_Shell\Installer\bin\Release\msi\RevitShell_<version>.msi"
+msiexec /x "D:\Repository\Cazorlas\Revit_Shell\Installer\bin\Release\msi\PaperEngineerShell_<version>.msi"
 ```
 
 During uninstall, the MSI runs:
@@ -224,10 +224,9 @@ Revit_Shell/
 - This project is a COM shell extension, not a simple registry verb that launches an external `.exe`.
 - Installation and removal require administrator privileges because the shell extension is registered machine-wide.
 - The context menu icon is embedded from:
-  - `sources/images/autodesk_logo.png`
+  - `sources/images/PaperEngineerShell_16.png`
+- `tools/Make-BrandImages.ps1` draws the icon (16, 32, 120 and 256 px) and the installer banner and background; rerun it after changing the design.
 
 ## Future Improvements
 
 - Add structured diagnostics for version-detection failures
-- Replace the runtime PNG resize with a dedicated `.ico`
-- Add CI packaging for MSI release artifacts

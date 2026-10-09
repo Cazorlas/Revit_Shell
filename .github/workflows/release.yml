@@ -36,7 +36,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $tag = '${{ github.ref_name }}'
-          $msi = "Installer/bin/Release/msi/RevitShell_$tag.msi"
+          $msi = "Installer/bin/Release/msi/PaperEngineerShell_$tag.msi"
           if (-not (Test-Path $msi)) { throw "MSI not found: $msi" }
           $notes = "docs/release-notes/$tag.md"
           if (Test-Path $notes) {

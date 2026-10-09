@@ -129,13 +129,13 @@ public class RevitShellContextMenu : SharpContextMenu
     }
 
     /// <summary>
-    /// Loads the embedded Autodesk logo used by the context menu items.
+    /// Loads the embedded PaperEngineer Shell icon used by the context menu items.
     /// </summary>
     /// <returns>A 16x16 image for the context menu.</returns>
     private static Image LoadMenuIcon()
     {
         using var stream = Assembly.GetExecutingAssembly()
-            .GetManifestResourceStream("RevitShell.Resources.autodesk_logo.png");
+            .GetManifestResourceStream("RevitShell.Resources.PaperEngineerShell_16.png");
 
         if (stream == null)
         {

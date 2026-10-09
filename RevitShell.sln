@@ -17,8 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sources", "sources", "{9869
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{8858F986-55A8-4383-B2B3-1E6DF86E3955}"
 	ProjectSection(SolutionItems) = preProject
-		sources\images\autodesk_logo.png = sources\images\autodesk_logo.png
-		sources\images\Engineer120x120.png = sources\images\Engineer120x120.png
+		sources\images\PaperEngineerShell_16.png = sources\images\PaperEngineerShell_16.png
+		sources\images\PaperEngineerShell_120.png = sources\images\PaperEngineerShell_120.png
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevitShell.Tests", "RevitShell.Tests\RevitShell.Tests.csproj", "{951937AB-9C91-496A-885F-6751E2E2AE5A}"

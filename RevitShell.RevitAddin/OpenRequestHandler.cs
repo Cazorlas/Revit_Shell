@@ -20,7 +20,7 @@ public sealed class OpenRequestHandler : IExternalEventHandler
 
     /// <summary>Gets the external event display name.</summary>
     /// <returns>The shell open request name.</returns>
-    public string GetName() => "Revit Shell open request";
+    public string GetName() => "PaperEngineer Shell open request";
 
     /// <summary>Creates a local copy when requested and opens the chosen model.</summary>
     /// <param name="app">The active Revit application.</param>
@@ -54,7 +54,7 @@ public sealed class OpenRequestHandler : IExternalEventHandler
         }
         catch (Exception ex)
         {
-            TaskDialog.Show("Revit Shell", _request.Mode + " failed for " +
+            TaskDialog.Show("PaperEngineer Shell", _request.Mode + " failed for " +
                 Path.GetFileName(_request.ModelPath) + ":\n" + ex.Message);
         }
     }

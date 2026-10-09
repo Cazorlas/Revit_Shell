@@ -22,6 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\sources\images\autodesk_logo.png" Link="Resources\autodesk_logo.png" />
+    <EmbeddedResource Include="..\sources\images\PaperEngineerShell_16.png" Link="Resources\PaperEngineerShell_16.png" />
   </ItemGroup>
 </Project>

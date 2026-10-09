@@ -7,11 +7,11 @@ using WixFile = WixSharp.File;
 namespace Installer;
 
 /// <summary>
-/// Builds the MSI package for the Revit Shell extension.
+/// Builds the MSI package for the PaperEngineer Shell extension.
 /// </summary>
 internal static class Program
 {
-    private const string ProductName = "Revit Shell";
+    private const string ProductName = "PaperEngineer Shell";
     private const string CompanyName = "PaperEngineer";
     private static readonly Version ProductVersion = ReadProductVersion();
     private const string ShellExtensionClsid = "{7C7656C0-A90F-4B96-8B24-86C68A191F14}";
@@ -57,13 +57,13 @@ internal static class Program
 
             var project = new Project(
                 ProductName,
-                new InstallDir(@"%ProgramFiles%\RevitShell",
+                new InstallDir(@"%ProgramFiles%\PaperEngineer\Shell",
                     installFiles),
                 new Dir(@"%CommonAppDataFolder%\Autodesk\Revit\Addins",
                     GetAddinDirectories(solutionRoot, configuration)),
-                new Dir(@"%ProgramMenu%\PaperEngineer\Revit Shell",
+                new Dir(@"%ProgramMenu%\PaperEngineer\PaperEngineer Shell",
                     new ExeFileShortcut(
-                        "Uninstall Revit Shell",
+                        "Uninstall PaperEngineer Shell",
                         "[System64Folder]msiexec.exe",
                         "/x [ProductCode]")))
             {
@@ -71,7 +71,7 @@ internal static class Program
                 Version = ProductVersion,
                 Platform = Platform.x64,
                 OutDir = outputDirectory,
-                OutFileName = $"RevitShell_{ProductVersion}",
+                OutFileName = $"PaperEngineerShell_{ProductVersion}",
                 InstallScope = InstallScope.perMachine,
                 UI = WUI.WixUI_Minimal,
                 LicenceFile = licenceFile,
@@ -84,7 +84,7 @@ internal static class Program
                         RegistryHive.LocalMachine,
                         @"SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved",
                         ShellExtensionClsid,
-                        "Revit Shell Context Menu")
+                        "PaperEngineer Shell Context Menu")
                     {
                         Win64 = true
                     }
