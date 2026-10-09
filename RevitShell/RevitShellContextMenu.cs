@@ -52,8 +52,14 @@ public class RevitShellContextMenu : SharpContextMenu
         openItem.Image = MenuIcon;
         openItem.Click += (_, _) => OpenWithExactVersion();
 
+        var updateItem = new ToolStripMenuItem("Check for updates");
+        updateItem.Image = MenuIcon;
+        updateItem.Click += (_, _) => CheckForUpdates();
+
         menu.Items.Add(infoItem);
         menu.Items.Add(openItem);
+        menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(updateItem);
 
         return menu;
     }
@@ -75,6 +81,7 @@ public class RevitShellContextMenu : SharpContextMenu
             "Revit Version Info",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
+        UpdateScheduler.StartAutomaticCheck();
     }
 
     /// <summary>
@@ -100,6 +107,24 @@ public class RevitShellContextMenu : SharpContextMenu
             MessageBox.Show(
                 ex.Message,
                 "Open with exact Revit version",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
+        UpdateScheduler.StartAutomaticCheck();
+    }
+
+    /// <summary>Checks for shell extension updates at the user's request.</summary>
+    private void CheckForUpdates()
+    {
+        try
+        {
+            RevitShellCompositionRoot.CheckForUpdates.Run(true);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                ex.Message,
+                "PaperEngineer Shell update",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
