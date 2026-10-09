@@ -15,12 +15,32 @@ public sealed class RevitInfo
     /// <param name="isSupported">Indicates whether the file extension is supported.</param>
     /// <param name="version">The detected Revit version, if available.</param>
     public RevitInfo(string filePath, bool exists, bool isSupported, int? version)
+        : this(filePath, exists, isSupported, version, WorksharingInfo.Unknown)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a file inspection result including worksharing information.
+    /// </summary>
+    /// <param name="filePath">The target file path.</param>
+    /// <param name="exists">Indicates whether the file exists.</param>
+    /// <param name="isSupported">Indicates whether the extension is supported.</param>
+    /// <param name="version">The detected Revit version, if available.</param>
+    /// <param name="worksharing">The detected worksharing information.</param>
+    public RevitInfo(string filePath, bool exists, bool isSupported, int? version, WorksharingInfo worksharing)
     {
         FilePath = filePath;
         Exists = exists;
         IsSupported = isSupported;
         Version = version;
+        Worksharing = worksharing ?? WorksharingInfo.Unknown;
     }
+
+    /// <summary>Gets the worksharing information, or unknown when unavailable.</summary>
+    public WorksharingInfo Worksharing { get; }
+
+    /// <summary>Gets whether the file is a local or central workshared model.</summary>
+    public bool IsWorkshared => Worksharing.State == WorksharingState.Local || Worksharing.State == WorksharingState.Central;
 
     /// <summary>
     /// Gets the target file path.

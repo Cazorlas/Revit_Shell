@@ -11,6 +11,7 @@ namespace RevitShell.Application;
 public sealed class RevitFileInspector : IRevitFileInspector
 {
     private readonly IRevitVersionDetector _versionDetector;
+    private readonly IRevitWorksharingDetector? _worksharingDetector;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RevitFileInspector"/> class.
@@ -19,6 +20,15 @@ public sealed class RevitFileInspector : IRevitFileInspector
     public RevitFileInspector(IRevitVersionDetector versionDetector)
     {
         _versionDetector = versionDetector ?? throw new ArgumentNullException(nameof(versionDetector));
+    }
+
+    /// <summary>Initializes an inspector with version and worksharing detectors.</summary>
+    /// <param name="versionDetector">The version detector used during inspection.</param>
+    /// <param name="worksharingDetector">The worksharing detector used during inspection.</param>
+    public RevitFileInspector(IRevitVersionDetector versionDetector, IRevitWorksharingDetector worksharingDetector)
+        : this(versionDetector)
+    {
+        _worksharingDetector = worksharingDetector ?? throw new ArgumentNullException(nameof(worksharingDetector));
     }
 
     /// <inheritdoc />
@@ -33,7 +43,10 @@ public sealed class RevitFileInspector : IRevitFileInspector
         var exists = File.Exists(path);
         var isSupported = IsSupportedFile(path);
         var version = exists && isSupported ? _versionDetector.DetectVersion(path) : null;
+        var worksharing = exists && isSupported
+            ? _worksharingDetector?.Detect(path) ?? WorksharingInfo.Unknown
+            : WorksharingInfo.Unknown;
 
-        return new RevitInfo(path, exists, isSupported, version);
+        return new RevitInfo(path, exists, isSupported, version, worksharing);
     }
 }
