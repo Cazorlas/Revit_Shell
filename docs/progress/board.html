@@ -30,13 +30,26 @@ code { font-size:13px; }
 <p class="sub">Mỗi việc mới thêm ở trên cùng.</p>
 
 <section>
+<h2>Dependabot + CI cho PR</h2>
+<div class="meta">2026-10-10 · A làm trực tiếp (2 file cấu hình)</div>
+<table>
+<thead><tr><th>Bước</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead>
+<tbody>
+<tr><td><code>.github/dependabot.yml</code></td><td class="s done">xong</td><td>NuGet + GitHub Actions, hằng tuần, gộp minor/patch thành 1 PR. Chặn nâng major của Nice3point.Revit.Api.* (major = năm Revit) và WixSharp (2.x = WiX 4)</td></tr>
+<tr><td><code>.github/workflows/ci.yml</code></td><td class="s done">xong</td><td>Build Release + test cho mọi PR và push lên main</td></tr>
+<tr><td>Merge PR của Dependabot</td><td class="s todo">chủ repo</td><td>Merge khi CI xanh; "cập nhật" để ra bản mới</td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
 <h2>Menu chuột phải: gộp "Check for updates" vào nhóm</h2>
 <div class="meta">2026-10-10 · A sửa trực tiếp (1 dòng)</div>
 <table>
 <thead><tr><th>Bước</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead>
 <tbody>
 <tr><td>Bỏ đường kẻ ngăn trước "Check for updates"</td><td class="s done">xong</td><td><code>RevitShellContextMenu.CreateMenu</code>; build 0 lỗi</td></tr>
-<tr><td>Phát hành 1.4.2</td><td class="s run">đang chạy</td><td>Tag 1.4.2; chờ workflow đăng <code>PaperEngineerShell_1.4.2.msi</code></td></tr>
+<tr><td>Phát hành 1.4.2</td><td class="s done">xong</td><td>Workflow xanh; release Latest có <code>PaperEngineerShell_1.4.2.msi</code> kèm digest SHA-256</td></tr>
 </tbody>
 </table>
 </section>

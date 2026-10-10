@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    ignore:
+      # The major version is the Revit year (2014 = net48 for Revit 2014-2024, 2025 = net8, 2027 = net10).
+      # Raising it drops support for older Revit versions, so only minor and patch updates are taken.
+      - dependency-name: "Nice3point.Revit.Api.*"
+        update-types: ["version-update:semver-major"]
+      # WixSharp 2.x moves the installer to WiX 4; that migration is done by hand.
+      - dependency-name: "WixSharp*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      nuget-minor-patch:
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
