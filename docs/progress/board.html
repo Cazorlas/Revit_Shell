@@ -30,6 +30,20 @@ code { font-size:13px; }
 <p class="sub">Mỗi việc mới thêm ở trên cùng.</p>
 
 <section>
+<h2>Explorer tự mở lại sau khi cập nhật → 1.4.3</h2>
+<div class="meta">2026-10-11 · A sửa trực tiếp (1 hàm + 2 test hiện có)</div>
+<table>
+<thead><tr><th>Bước</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead>
+<tbody>
+<tr><td>Lỗi</td><td class="s done">xác nhận</td><td>Cập nhật 1.4.1 → 1.4.2 cài xong (MsiInstaller 11707) nhưng Explorer không được mở lại</td></tr>
+<tr><td>Sửa <code>MsiUpdateInstaller.CreateStartInfo</code></td><td class="s done">xong</td><td>cmd ẩn: chờ msiexec, đợi 3 s, mở explorer nếu chưa chạy. 69/69 test</td></tr>
+<tr><td>Chạy thử lệnh thật (thay msiexec bằng lệnh vô hại)</td><td class="s done">xong</td><td>Có chờ; Explorer đang chạy → không mở thêm; Explorer không chạy → mở</td></tr>
+<tr><td>Phát hành 1.4.3</td><td class="s run">đang chạy</td><td></td></tr>
+</tbody>
+</table>
+</section>
+
+<section>
 <h2>Chuẩn bị store: ảnh, nội dung, email, kiểm thử Revit</h2>
 <div class="meta">2026-10-11 · A làm trực tiếp (tài liệu + ảnh, không đổi code)</div>
 <table>

@@ -394,8 +394,8 @@ public sealed class UpdateTests
             Assert.Equal(release.MsiUrl, download.Item1);
             Assert.Equal(path, download.Item2);
             var start = Assert.Single(starts);
-            Assert.Equal("msiexec.exe", start.FileName);
-            Assert.Equal("/i \"" + path + "\" /passive /norestart", start.Arguments);
+            Assert.Equal("cmd.exe", start.FileName);
+            Assert.Contains("start \"\" /wait msiexec.exe /i \"" + path + "\" /passive /norestart", start.Arguments);
             Assert.True(File.Exists(path));
         });
     }
@@ -441,15 +441,21 @@ public sealed class UpdateTests
         });
     }
 
-    /// <summary>Row 33: MSI start info quotes the path and uses shell execution.</summary>
+    /// <summary>
+    /// Row 33: a hidden command waits for msiexec with the quoted path, then starts Explorer only when it is not running.
+    /// </summary>
     [Fact]
     public void CreateStartInfo_MsiPath_SetsExactProcessOptions()
     {
         var start = MsiUpdateInstaller.CreateStartInfo(@"C:\t\P.msi");
 
-        Assert.Equal("msiexec.exe", start.FileName);
-        Assert.Equal("/i \"C:\\t\\P.msi\" /passive /norestart", start.Arguments);
+        Assert.Equal("cmd.exe", start.FileName);
+        Assert.Equal("/d /s /c \"start \"\" /wait msiexec.exe /i \"C:\\t\\P.msi\" /passive /norestart" +
+            " & ping -n 4 127.0.0.1 >nul" +
+            " & tasklist /fi \"imagename eq explorer.exe\" | find /i \"explorer.exe\" >nul || start \"\" explorer.exe\"",
+            start.Arguments);
         Assert.True(start.UseShellExecute);
+        Assert.Equal(ProcessWindowStyle.Hidden, start.WindowStyle);
     }
 
     private static UpdateRelease Release(string version, string? sha256 = "ab") =>

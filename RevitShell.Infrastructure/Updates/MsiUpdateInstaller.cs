@@ -53,14 +53,24 @@ public sealed class MsiUpdateInstaller : IUpdateInstaller
         _start(CreateStartInfo(path));
     }
 
-    /// <summary>Creates a shell launch for passive installation without restarting Windows.</summary>
+    /// <summary>
+    /// Creates a hidden command that runs a passive installation without restarting Windows, then starts
+    /// File Explorer again if the installer closed it and Windows did not restart it.
+    /// </summary>
+    /// <remarks>
+    /// The shell extension lives inside explorer.exe, so Windows Installer closes Explorer to replace it.
+    /// The command runs outside Explorer and unelevated, so the Explorer it starts is the normal user shell.
+    /// </remarks>
     public static ProcessStartInfo CreateStartInfo(string msiPath)
     {
         return new ProcessStartInfo
         {
-            FileName = "msiexec.exe",
-            Arguments = "/i \"" + msiPath + "\" /passive /norestart",
-            UseShellExecute = true
+            FileName = "cmd.exe",
+            Arguments = "/d /s /c \"start \"\" /wait msiexec.exe /i \"" + msiPath + "\" /passive /norestart" +
+                " & ping -n 4 127.0.0.1 >nul" +
+                " & tasklist /fi \"imagename eq explorer.exe\" | find /i \"explorer.exe\" >nul || start \"\" explorer.exe\"",
+            UseShellExecute = true,
+            WindowStyle = ProcessWindowStyle.Hidden
         };
     }
 
