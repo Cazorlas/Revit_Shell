@@ -58,7 +58,6 @@ public class RevitShellContextMenu : SharpContextMenu
 
         menu.Items.Add(infoItem);
         menu.Items.Add(openItem);
-        menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(updateItem);
 
         return menu;
