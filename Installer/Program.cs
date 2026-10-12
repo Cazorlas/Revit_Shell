@@ -85,6 +85,13 @@ internal static class Program
                 BannerImage = bannerImage,
                 BackgroundImage = backgroundImage,
                 MajorUpgrade = MajorUpgrade.Default,
+                // Never let Restart Manager close Explorer to replace the in-use shell extension: as an
+                // elevated SYSTEM installer it cannot restart the user's shell and leaves no taskbar.
+                // Windows Installer renames the locked DLL instead and installs the new one beside it.
+                Properties = new[]
+                {
+                    new Property("MSIRESTARTMANAGERCONTROL", "Disable")
+                },
                 RegValues = new[]
                 {
                     new RegValue(
