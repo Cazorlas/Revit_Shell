@@ -38,8 +38,8 @@ code { font-size:13px; }
 <tr><td>Lỗi</td><td class="s done">xác nhận</td><td>Cập nhật 1.4.2 → 1.4.3 lúc 9:36: RestartManager 10006 "Windows Explorer could not be shut down", 10010 "cannot be restarted - SID does not match Conductor SID". Explorer pid 115304 còn sống nhưng mất taskbar; phải khởi động lại máy</td></tr>
 <tr><td>Vì sao 1.4.3 không cứu được</td><td class="s done">xác nhận</td><td>Kiểm "có explorer.exe đang chạy" luôn đúng: tiến trình Explorer mất taskbar vẫn sống, cửa sổ thư mục chạy tiến trình riêng</td></tr>
 <tr><td>Sửa <code>Installer/Program.cs</code></td><td class="s done">xong</td><td>Thuộc tính MSI <code>MSIRESTARTMANAGERCONTROL=Disable</code>: Installer không đóng Explorer, đổi tên DLL đang khóa và cài DLL mới. Có hiệu lực ngay cho lần 1.4.3 → 1.4.4. Bảng Property của MSI build có giá trị này; 69/69 test</td></tr>
-<tr><td>Cài thử 1.4.4 trên máy</td><td class="s todo">chờ chủ repo</td><td>Cần UAC; kiểm taskbar còn, menu chuột phải chạy</td></tr>
-<tr><td>Phát hành 1.4.4</td><td class="s todo">chờ chủ repo</td><td>Push + tag v1.4.4 khi được đồng ý</td></tr>
+<tr><td>Cập nhật 1.4.3 → 1.4.4 trên máy</td><td class="s todo">chủ repo</td><td>Chủ repo tự cập nhật; kiểm taskbar còn, menu chuột phải chạy</td></tr>
+<tr><td>Phát hành 1.4.4</td><td class="s done">xong</td><td>Tag 1.4.4, workflow Release xanh; Release Latest có <code>PaperEngineerShell_1.4.4.msi</code> kèm digest SHA-256</td></tr>
 </tbody>
 </table>
 </section>
