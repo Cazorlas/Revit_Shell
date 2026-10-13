@@ -71,7 +71,6 @@ public sealed class UpdateTests
 
         AssertAsked(fixture, new Version(1, 4, 0));
         Assert.Equal(Now, fixture.State.LastCheckUtc);
-        Assert.Null(fixture.State.SkippedVersion);
         Assert.Empty(fixture.Installer.Releases);
     }
 
@@ -159,65 +158,79 @@ public sealed class UpdateTests
         AssertAsked(fixture, new Version(1, 4, 0));
     }
 
-    /// <summary>Row 14: an automatic check does not offer the previously skipped version.</summary>
+    /// <summary>Row 14: an automatic check is silent when the release is already installed on disk.</summary>
     [Fact]
-    public void Run_SkippedAutomatic_DoesNotAsk()
+    public void Run_InstalledReleaseAutomatic_IsSilentlyRestartPending()
     {
-        var fixture = new UpdateFixture("1.4.0");
-        fixture.State.SkippedVersion = "1.4.0";
+        var fixture = new UpdateFixture("1.4.0", installed: new Version(1, 4, 0));
 
-        Assert.Equal(UpdateCheckOutcome.SkippedEarlier, fixture.Run(false));
+        Assert.Equal(UpdateCheckOutcome.RestartPending, fixture.Run(false));
 
         Assert.Empty(fixture.Prompt.Asks);
-    }
-
-    /// <summary>Row 15: a manual check offers the previously skipped version.</summary>
-    [Fact]
-    public void Run_SkippedManual_OffersAgain()
-    {
-        var fixture = new UpdateFixture("1.4.0");
-        fixture.State.SkippedVersion = "1.4.0";
-
-        Assert.Equal(UpdateCheckOutcome.LaterChosen, fixture.Run(true));
-
-        AssertAsked(fixture, new Version(1, 4, 0));
-    }
-
-    /// <summary>Row 16: skipping one version does not suppress a newer version.</summary>
-    [Fact]
-    public void Run_NewerThanSkippedAutomatic_OffersRelease()
-    {
-        var fixture = new UpdateFixture("1.5.0");
-        fixture.State.SkippedVersion = "1.4.0";
-
-        fixture.Run(false);
-
-        AssertAsked(fixture, new Version(1, 5, 0));
-    }
-
-    /// <summary>Row 17: choosing Skip stores the offered version without installing.</summary>
-    [Fact]
-    public void Run_SkipChoice_StoresSkippedVersion()
-    {
-        var fixture = new UpdateFixture("1.4.0", UpdatePromptChoice.Skip);
-
-        Assert.Equal(UpdateCheckOutcome.SkipChosen, fixture.Run(false));
-
-        Assert.Equal("1.4.0", fixture.State.SkippedVersion);
+        Assert.Empty(fixture.Prompt.UpToDateVersions);
+        Assert.Empty(fixture.Prompt.RestartNeeded);
+        Assert.Empty(fixture.Prompt.Installed);
+        Assert.Empty(fixture.Prompt.Errors);
         Assert.Empty(fixture.Installer.Releases);
     }
 
-    /// <summary>Row 18: choosing Install starts installation of the offered release.</summary>
+    /// <summary>Row 15: a manual check reports the installed version that needs an Explorer restart.</summary>
+    [Fact]
+    public void Run_InstalledReleaseManual_ShowsRestartNeeded()
+    {
+        var fixture = new UpdateFixture("1.4.0", installed: new Version(1, 4, 0));
+
+        Assert.Equal(UpdateCheckOutcome.RestartPending, fixture.Run(true));
+
+        Assert.Equal(new Version(1, 4, 0), Assert.Single(fixture.Prompt.RestartNeeded));
+        Assert.Empty(fixture.Prompt.Asks);
+        Assert.Empty(fixture.Prompt.UpToDateVersions);
+        Assert.Empty(fixture.Prompt.Installed);
+        Assert.Empty(fixture.Prompt.Errors);
+        Assert.Empty(fixture.Installer.Releases);
+    }
+
+    /// <summary>Row 16: a manual check reports a pending restart even when the feed has no release.</summary>
+    [Fact]
+    public void Run_InstalledVersionWithoutReleaseManual_ShowsRestartNeeded()
+    {
+        var fixture = new UpdateFixture(null, installed: new Version(1, 4, 0));
+
+        Assert.Equal(UpdateCheckOutcome.RestartPending, fixture.Run(true));
+
+        Assert.Equal(new Version(1, 4, 0), Assert.Single(fixture.Prompt.RestartNeeded));
+        Assert.Empty(fixture.Prompt.Asks);
+        Assert.Empty(fixture.Prompt.UpToDateVersions);
+        Assert.Empty(fixture.Prompt.Installed);
+        Assert.Empty(fixture.Prompt.Errors);
+        Assert.Empty(fixture.Installer.Releases);
+    }
+
+    /// <summary>Row 17: a newer release is offered using the installed disk version as current.</summary>
+    [Fact]
+    public void Run_NewerThanDiskAutomatic_OffersReleaseWithDiskVersion()
+    {
+        var fixture = new UpdateFixture("1.5.0", installed: new Version(1, 4, 0));
+
+        Assert.Equal(UpdateCheckOutcome.LaterChosen, fixture.Run(false));
+
+        AssertAsked(fixture, new Version(1, 5, 0), new Version(1, 4, 0));
+        Assert.Empty(fixture.Installer.Releases);
+    }
+
+    /// <summary>Row 18: choosing Install completes installation and reports the installed release.</summary>
     [Fact]
     public void Run_InstallChoice_InstallsOfferedRelease()
     {
         var fixture = new UpdateFixture("1.4.0", UpdatePromptChoice.Install);
 
-        Assert.Equal(UpdateCheckOutcome.InstallStarted, fixture.Run(false));
+        Assert.Equal(UpdateCheckOutcome.InstallCompleted, fixture.Run(false));
 
         var installed = Assert.Single(fixture.Installer.Releases);
         Assert.Same(fixture.Feed.Release, installed);
         Assert.Equal(new Version(1, 4, 0), installed.Version);
+        Assert.Equal(new Version(1, 4, 0), Assert.Single(fixture.Prompt.Installed));
+        Assert.Empty(fixture.Prompt.Errors);
     }
 
     /// <summary>Row 19: an installer hash failure shows an error without escaping.</summary>
@@ -349,22 +362,19 @@ public sealed class UpdateTests
 
     /// <summary>Row 29: registry state persists across instances and preserves UTC kind.</summary>
     [Fact]
-    public void RegistryState_NewAndReopened_RoundTripsUtcAndSkippedVersion()
+    public void RegistryState_NewAndReopened_RoundTripsUtc()
     {
         var key = @"Software\PaperEngineer\ShellTests\" + Guid.NewGuid().ToString("N");
         try
         {
             var store = new RegistryUpdateStateStore(key);
             Assert.Null(store.LastCheckUtc);
-            Assert.Null(store.SkippedVersion);
 
             store.LastCheckUtc = Now;
-            store.SkippedVersion = "1.4.0";
             var reopened = new RegistryUpdateStateStore(key);
 
             Assert.Equal(Now, reopened.LastCheckUtc);
             Assert.Equal(DateTimeKind.Utc, reopened.LastCheckUtc!.Value.Kind);
-            Assert.Equal("1.4.0", reopened.SkippedVersion);
         }
         finally
         {
@@ -372,9 +382,9 @@ public sealed class UpdateTests
         }
     }
 
-    /// <summary>Row 30: verified MSI bytes start msiexec once with the downloaded path.</summary>
+    /// <summary>Row 30: verified MSI bytes run msiexec once and return Installed.</summary>
     [Fact]
-    public void Install_ValidHash_DownloadsAndStartsMsi()
+    public void Install_ValidHash_DownloadsAndRunsMsi()
     {
         WithDirectory(directory =>
         {
@@ -386,16 +396,21 @@ public sealed class UpdateTests
             {
                 downloads.Add(Tuple.Create(url, target));
                 File.WriteAllBytes(target, Encoding.UTF8.GetBytes("abc"));
-            }, starts.Add, directory);
+            }, info =>
+            {
+                starts.Add(info);
+                return 0;
+            }, directory);
 
-            installer.Install(release);
+            Assert.Equal(UpdateInstallResult.Installed, installer.Install(release));
 
             var download = Assert.Single(downloads);
             Assert.Equal(release.MsiUrl, download.Item1);
             Assert.Equal(path, download.Item2);
             var start = Assert.Single(starts);
-            Assert.Equal("cmd.exe", start.FileName);
-            Assert.Contains("start \"\" /wait msiexec.exe /i \"" + path + "\" /passive /norestart", start.Arguments);
+            var expected = MsiUpdateInstaller.CreateStartInfo(path);
+            Assert.Equal(expected.FileName, start.FileName);
+            Assert.Equal(expected.Arguments, start.Arguments);
             Assert.True(File.Exists(path));
         });
     }
@@ -414,7 +429,11 @@ public sealed class UpdateTests
             {
                 downloads.Add(target);
                 File.WriteAllBytes(target, Encoding.UTF8.GetBytes("abc"));
-            }, starts.Add, directory);
+            }, info =>
+            {
+                starts.Add(info);
+                return 0;
+            }, directory);
 
             Assert.Throws<InvalidDataException>(() => installer.Install(release));
 
@@ -433,7 +452,11 @@ public sealed class UpdateTests
             var starts = new List<ProcessStartInfo>();
             var release = Release("1.4.0", null);
             var installer = new MsiUpdateInstaller((url, target) =>
-                File.WriteAllBytes(target, Encoding.UTF8.GetBytes("abc")), starts.Add, directory);
+                File.WriteAllBytes(target, Encoding.UTF8.GetBytes("abc")), info =>
+                {
+                    starts.Add(info);
+                    return 0;
+                }, directory);
 
             Assert.Throws<InvalidDataException>(() => installer.Install(release));
 
@@ -441,21 +464,126 @@ public sealed class UpdateTests
         });
     }
 
-    /// <summary>
-    /// Row 33: a hidden command waits for msiexec with the quoted path, then starts Explorer only when it is not running.
-    /// </summary>
+    /// <summary>Row 33: msiexec runs a passive installation with the exact quoted path and no restart.</summary>
     [Fact]
     public void CreateStartInfo_MsiPath_SetsExactProcessOptions()
     {
         var start = MsiUpdateInstaller.CreateStartInfo(@"C:\t\P.msi");
 
-        Assert.Equal("cmd.exe", start.FileName);
-        Assert.Equal("/d /s /c \"start \"\" /wait msiexec.exe /i \"C:\\t\\P.msi\" /passive /norestart" +
-            " & ping -n 4 127.0.0.1 >nul" +
-            " & tasklist /fi \"imagename eq explorer.exe\" | find /i \"explorer.exe\" >nul || start \"\" explorer.exe\"",
-            start.Arguments);
+        Assert.Equal(Path.Combine(Environment.SystemDirectory, "msiexec.exe"), start.FileName);
+        Assert.Equal("/i \"C:\\t\\P.msi\" /passive /norestart", start.Arguments);
         Assert.True(start.UseShellExecute);
-        Assert.Equal(ProcessWindowStyle.Hidden, start.WindowStyle);
+    }
+
+    /// <summary>Row 34: a disk version older than the running version does not replace current.</summary>
+    [Fact]
+    public void Run_OlderDiskManual_ShowsRunningVersionUpToDate()
+    {
+        var fixture = new UpdateFixture("1.3.0", installed: new Version(1, 2, 0));
+
+        Assert.Equal(UpdateCheckOutcome.UpToDate, fixture.Run(true));
+
+        Assert.Equal(Current, Assert.Single(fixture.Prompt.UpToDateVersions));
+        Assert.Empty(fixture.Prompt.Asks);
+        Assert.Empty(fixture.Prompt.RestartNeeded);
+        Assert.Empty(fixture.Prompt.Installed);
+        Assert.Empty(fixture.Prompt.Errors);
+    }
+
+    /// <summary>Row 35: cancelling installation reports cancellation without installed feedback or errors.</summary>
+    [Fact]
+    public void Run_InstallerCancelled_DoesNotShowInstalledOrError()
+    {
+        var fixture = new UpdateFixture("1.4.0", UpdatePromptChoice.Install);
+        fixture.Installer.Result = UpdateInstallResult.Cancelled;
+
+        Assert.Equal(UpdateCheckOutcome.InstallCancelled, fixture.Run(false));
+
+        Assert.Same(fixture.Feed.Release, Assert.Single(fixture.Installer.Releases));
+        Assert.Empty(fixture.Prompt.Installed);
+        Assert.Empty(fixture.Prompt.Errors);
+    }
+
+    /// <summary>Row 36: the update prompt offers exactly Install and Later.</summary>
+    [Fact]
+    public void UpdatePromptChoice_Names_ContainsOnlyInstallAndLater()
+    {
+        Assert.Equal(new[] { "Install", "Later" }, Enum.GetNames(typeof(UpdatePromptChoice)));
+    }
+
+    /// <summary>Row 37: successful MSI exit codes map to Installed.</summary>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(3010)]
+    [InlineData(1641)]
+    public void Install_SuccessExitCode_ReturnsInstalled(int exitCode)
+    {
+        WithDirectory(directory =>
+        {
+            var installer = new MsiUpdateInstaller((url, target) =>
+                File.WriteAllBytes(target, Encoding.UTF8.GetBytes("abc")), info => exitCode, directory);
+
+            Assert.Equal(UpdateInstallResult.Installed, installer.Install(Release("1.4.0", AbcHash)));
+        });
+    }
+
+    /// <summary>Row 38: cancelled MSI exit codes map to Cancelled.</summary>
+    [Theory]
+    [InlineData(1602)]
+    [InlineData(1223)]
+    public void Install_CancelledExitCode_ReturnsCancelled(int exitCode)
+    {
+        WithDirectory(directory =>
+        {
+            var installer = new MsiUpdateInstaller((url, target) =>
+                File.WriteAllBytes(target, Encoding.UTF8.GetBytes("abc")), info => exitCode, directory);
+
+            Assert.Equal(UpdateInstallResult.Cancelled, installer.Install(Release("1.4.0", AbcHash)));
+        });
+    }
+
+    /// <summary>Row 39: a failed MSI exit throws with the exit code in the message.</summary>
+    [Fact]
+    public void Install_FailureExitCode_ThrowsWithExitCode()
+    {
+        WithDirectory(directory =>
+        {
+            var installer = new MsiUpdateInstaller((url, target) =>
+                File.WriteAllBytes(target, Encoding.UTF8.GetBytes("abc")), info => 1603, directory);
+
+            var exception = Assert.Throws<InvalidOperationException>(() => installer.Install(Release("1.4.0", AbcHash)));
+
+            Assert.Contains("1603", exception.Message);
+        });
+    }
+
+    /// <summary>Row 40: a real assembly file supplies its three-component version.</summary>
+    [Fact]
+    public void InstalledVersion_RealAssembly_ReturnsThreeComponents()
+    {
+        var assembly = typeof(CheckForUpdatesUseCase).Assembly;
+        var version = assembly.GetName().Version!;
+        var source = new AssemblyFileVersionSource(assembly.Location);
+
+        Assert.Equal(new Version(version.Major, version.Minor, version.Build), source.GetInstalledVersion());
+    }
+
+    /// <summary>Row 41: a missing assembly file returns null without throwing.</summary>
+    [Fact]
+    public void InstalledVersion_MissingFile_ReturnsNullWithoutThrowing()
+    {
+        WithDirectory(directory =>
+        {
+            var path = Path.Combine(directory, "missing.dll");
+            Assert.False(File.Exists(path));
+            var source = new AssemblyFileVersionSource(path);
+            Version? version = null;
+
+            var exception = Record.Exception(() => version = source.GetInstalledVersion());
+
+            Assert.Null(exception);
+            Assert.Null(version);
+        });
     }
 
     private static UpdateRelease Release(string version, string? sha256 = "ab") =>
@@ -475,10 +603,10 @@ public sealed class UpdateTests
         return changed;
     }
 
-    private static void AssertAsked(UpdateFixture fixture, Version version)
+    private static void AssertAsked(UpdateFixture fixture, Version version, Version? current = null)
     {
         var ask = Assert.Single(fixture.Prompt.Asks);
-        Assert.Equal(Current, ask.Item1);
+        Assert.Equal(current ?? Current, ask.Item1);
         Assert.Same(fixture.Feed.Release, ask.Item2);
         Assert.Equal(version, ask.Item2.Version);
     }
@@ -502,11 +630,13 @@ public sealed class UpdateTests
 
     private sealed class UpdateFixture
     {
-        public UpdateFixture(string? latestVersion, UpdatePromptChoice choice = UpdatePromptChoice.Later)
+        public UpdateFixture(string? latestVersion, UpdatePromptChoice choice = UpdatePromptChoice.Later,
+            Version? installed = null)
         {
             Feed.Release = latestVersion == null ? null : Release(latestVersion);
             Prompt.Choice = choice;
-            UseCase = new CheckForUpdatesUseCase(Current, Feed, State, Prompt, Installer, () => Now);
+            UseCase = new CheckForUpdatesUseCase(Current, Feed, State, Prompt, Installer,
+                new FakeInstalledVersionSource(installed), () => Now);
         }
 
         public FakeFeed Feed { get; } = new FakeFeed();
@@ -537,7 +667,6 @@ public sealed class UpdateTests
     private sealed class MemoryState : IUpdateStateStore
     {
         public DateTime? LastCheckUtc { get; set; }
-        public string? SkippedVersion { get; set; }
     }
 
     private sealed class RecordingPrompt : IUpdatePrompt
@@ -545,6 +674,8 @@ public sealed class UpdateTests
         public UpdatePromptChoice Choice { get; set; }
         public List<Tuple<Version, UpdateRelease>> Asks { get; } = new List<Tuple<Version, UpdateRelease>>();
         public List<Version> UpToDateVersions { get; } = new List<Version>();
+        public List<Version> RestartNeeded { get; } = new List<Version>();
+        public List<Version> Installed { get; } = new List<Version>();
         public List<string> Errors { get; } = new List<string>();
 
         public UpdatePromptChoice Ask(Version current, UpdateRelease release)
@@ -554,21 +685,34 @@ public sealed class UpdateTests
         }
 
         public void ShowUpToDate(Version current) => UpToDateVersions.Add(current);
+        public void ShowRestartNeeded(Version installed) => RestartNeeded.Add(installed);
+        public void ShowInstalled(Version installed) => Installed.Add(installed);
         public void ShowError(string message) => Errors.Add(message);
+    }
+
+    private sealed class FakeInstalledVersionSource : IInstalledVersionSource
+    {
+        private readonly Version? _installed;
+
+        public FakeInstalledVersionSource(Version? installed) => _installed = installed;
+
+        public Version? GetInstalledVersion() => _installed;
     }
 
     private sealed class RecordingInstaller : IUpdateInstaller
     {
         public List<UpdateRelease> Releases { get; } = new List<UpdateRelease>();
         public Exception? Error { get; set; }
+        public UpdateInstallResult Result { get; set; } = UpdateInstallResult.Installed;
 
-        public void Install(UpdateRelease release)
+        public UpdateInstallResult Install(UpdateRelease release)
         {
             Releases.Add(release);
             if (Error != null)
             {
                 throw Error;
             }
+            return Result;
         }
     }
 }
