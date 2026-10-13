@@ -30,7 +30,7 @@ code { font-size:13px; }
 <p class="sub">Mỗi việc mới thêm ở trên cùng.</p>
 
 <section>
-<h2>Bấm Update now không thấy gì; bỏ Skip this version</h2>
+<h2>Bấm Update now không thấy gì; bỏ Skip this version → 1.4.5</h2>
 <div class="meta">2026-10-14 · collab: Codex viết test đỏ (T1) và sửa code (T2), main session kiểm</div>
 <table>
 <thead><tr><th>Bước</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead>
@@ -39,7 +39,8 @@ code { font-size:13px; }
 <tr><td>T1 test đỏ</td><td class="s done">khoá</td><td>Codex viết lại <code>UpdateTests.cs</code> theo hợp đồng; build đỏ chỉ vì thiếu API mới. Commit 58a6b00</td></tr>
 <tr><td>T2 sửa code</td><td class="s done">xong</td><td>So với version DLL trên đĩa; đĩa mới hơn → kiểm tay báo "khởi động lại File Explorer", tự động thì im. Bỏ hẳn Skip (nút, enum, <code>SkippedVersion</code>). Chạy msiexec trực tiếp, chờ mã thoát: 0/3010/1641 báo đã cài, 1602/1223 = huỷ. Kiểm tay chạy trên luồng nền. Commit 52fcf37</td></tr>
 <tr><td>Kiểm cuối</td><td class="s done">xong</td><td>80/80 test, build RevitShell 0 cảnh báo</td></tr>
-<tr><td>Gộp vào main / phát hành</td><td class="s todo">chủ repo</td><td>Nhánh <code>collab/main/update-prompt-fix</code>, chờ chủ repo đồng ý</td></tr>
+<tr><td>Gộp vào main</td><td class="s done">xong</td><td>Fast-forward, xoá worktree và nhánh collab</td></tr>
+<tr><td>Phát hành 1.4.5</td><td class="s doing">đang chạy</td><td>Bump, release notes, tag 1.4.5</td></tr>
 </tbody>
 </table>
 </section>
