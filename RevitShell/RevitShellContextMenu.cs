@@ -117,15 +117,11 @@ public class RevitShellContextMenu : SharpContextMenu
     {
         try
         {
-            RevitShellCompositionRoot.CheckForUpdates.Run(true);
+            UpdateScheduler.StartManualCheck();
         }
-        catch (Exception ex)
+        catch
         {
-            MessageBox.Show(
-                ex.Message,
-                "PaperEngineer Shell update",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            // Update startup failures must never escape into Explorer.
         }
     }
 

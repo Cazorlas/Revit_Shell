@@ -10,27 +10,32 @@ namespace RevitShell.Infrastructure;
 public sealed class MsiUpdateInstaller : IUpdateInstaller
 {
     private readonly Action<Uri, string> _download;
-    private readonly Action<ProcessStartInfo> _start;
+    private readonly Func<ProcessStartInfo, int> _run;
     private readonly string _downloadDirectory;
 
     /// <summary>Initializes downloads and process launching in the temporary updates directory.</summary>
     public MsiUpdateInstaller()
-        : this(Download, info => { Process.Start(info); },
+        : this(Download, info =>
+            {
+                using var process = Process.Start(info) ?? throw new InvalidOperationException("Windows Installer did not start.");
+                process.WaitForExit();
+                return process.ExitCode;
+            },
             Path.Combine(Path.GetTempPath(), "PaperEngineerShell", "Updates"))
     {
     }
 
     /// <summary>Initializes the downloader, process launcher, and destination directory.</summary>
-    public MsiUpdateInstaller(Action<Uri, string> download, Action<ProcessStartInfo> start,
-        string downloadDirectory)
+    public MsiUpdateInstaller(Action<Uri, string> download, Func<ProcessStartInfo, int> run,
+        string dir)
     {
         _download = download ?? throw new ArgumentNullException(nameof(download));
-        _start = start ?? throw new ArgumentNullException(nameof(start));
-        _downloadDirectory = downloadDirectory ?? throw new ArgumentNullException(nameof(downloadDirectory));
+        _run = run ?? throw new ArgumentNullException(nameof(run));
+        _downloadDirectory = dir ?? throw new ArgumentNullException(nameof(dir));
     }
 
-    /// <summary>Downloads the MSI, rejects unverified bytes, and starts installation.</summary>
-    public void Install(UpdateRelease release)
+    /// <summary>Downloads the MSI, rejects unverified bytes, and waits for installation.</summary>
+    public UpdateInstallResult Install(UpdateRelease release)
     {
         if (release == null)
         {
@@ -50,27 +55,29 @@ public sealed class MsiUpdateInstaller : IUpdateInstaller
             File.Delete(path);
             throw new InvalidDataException("SHA-256 verification failed for " + release.MsiName + ".");
         }
-        _start(CreateStartInfo(path));
+        var exitCode = _run(CreateStartInfo(path));
+        switch (exitCode)
+        {
+            case 0:
+            case 3010:
+            case 1641:
+                return UpdateInstallResult.Installed;
+            case 1602:
+            case 1223:
+                return UpdateInstallResult.Cancelled;
+            default:
+                throw new InvalidOperationException("Windows Installer exited with code " + exitCode + ".");
+        }
     }
 
-    /// <summary>
-    /// Creates a hidden command that runs a passive installation without restarting Windows, then starts
-    /// File Explorer again if the installer closed it and Windows did not restart it.
-    /// </summary>
-    /// <remarks>
-    /// The shell extension lives inside explorer.exe, so Windows Installer closes Explorer to replace it.
-    /// The command runs outside Explorer and unelevated, so the Explorer it starts is the normal user shell.
-    /// </remarks>
+    /// <summary>Creates a passive Windows Installer command without restarting Windows.</summary>
     public static ProcessStartInfo CreateStartInfo(string msiPath)
     {
         return new ProcessStartInfo
         {
-            FileName = "cmd.exe",
-            Arguments = "/d /s /c \"start \"\" /wait msiexec.exe /i \"" + msiPath + "\" /passive /norestart" +
-                " & ping -n 4 127.0.0.1 >nul" +
-                " & tasklist /fi \"imagename eq explorer.exe\" | find /i \"explorer.exe\" >nul || start \"\" explorer.exe\"",
-            UseShellExecute = true,
-            WindowStyle = ProcessWindowStyle.Hidden
+            FileName = Path.Combine(Environment.SystemDirectory, "msiexec.exe"),
+            Arguments = "/i \"" + msiPath + "\" /passive /norestart",
+            UseShellExecute = true
         };
     }
 

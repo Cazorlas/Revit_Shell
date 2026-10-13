@@ -31,13 +31,6 @@ public sealed class RegistryUpdateStateStore : IUpdateStateStore
         set => WriteString(nameof(LastCheckUtc), value?.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture));
     }
 
-    /// <summary>Gets or sets the release version skipped by the user.</summary>
-    public string? SkippedVersion
-    {
-        get => ReadString(nameof(SkippedVersion));
-        set => WriteString(nameof(SkippedVersion), value);
-    }
-
     private string? ReadString(string name)
     {
         using var key = Registry.CurrentUser.OpenSubKey(_subKeyPath);

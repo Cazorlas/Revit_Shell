@@ -29,6 +29,7 @@ internal static class RevitShellCompositionRoot
         new RegistryUpdateStateStore(RegistryUpdateStateStore.DefaultSubKey),
         new UpdateDialog(),
         new MsiUpdateInstaller(),
+        new AssemblyFileVersionSource(typeof(RevitShellCompositionRoot).Assembly.Location),
         () => DateTime.UtcNow);
 
     private static Version GetCurrentVersion()

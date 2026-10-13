@@ -57,13 +57,18 @@ public interface IUpdateFeed
     UpdateRelease? GetLatest();
 }
 
-/// <summary>Persists update timing and skipped versions.</summary>
+/// <summary>Reads the shell extension version installed on disk.</summary>
+public interface IInstalledVersionSource
+{
+    /// <summary>Gets the installed version or null when it cannot be read.</summary>
+    Version? GetInstalledVersion();
+}
+
+/// <summary>Persists update timing.</summary>
 public interface IUpdateStateStore
 {
     /// <summary>Gets or sets the last feed check time in UTC.</summary>
     DateTime? LastCheckUtc { get; set; }
-    /// <summary>Gets or sets the three-component version skipped by the user.</summary>
-    string? SkippedVersion { get; set; }
 }
 
 /// <summary>Identifies the user's choice for an offered update.</summary>
@@ -71,8 +76,6 @@ public enum UpdatePromptChoice
 {
     /// <summary>Install the offered release.</summary>
     Install,
-    /// <summary>Skip automatic offers for this version.</summary>
-    Skip,
     /// <summary>Defer installation.</summary>
     Later
 }
@@ -84,15 +87,28 @@ public interface IUpdatePrompt
     UpdatePromptChoice Ask(Version current, UpdateRelease release);
     /// <summary>Reports that the installed version is up to date.</summary>
     void ShowUpToDate(Version current);
+    /// <summary>Reports that the installed version needs an Explorer restart.</summary>
+    void ShowRestartNeeded(Version installed);
+    /// <summary>Reports successful installation and the required Explorer restart.</summary>
+    void ShowInstalled(Version installed);
     /// <summary>Reports an update failure.</summary>
     void ShowError(string message);
 }
 
-/// <summary>Downloads, verifies, and starts installation of a release.</summary>
+/// <summary>Identifies the result of installing a release.</summary>
+public enum UpdateInstallResult
+{
+    /// <summary>The release was installed.</summary>
+    Installed,
+    /// <summary>The user cancelled installation.</summary>
+    Cancelled
+}
+
+/// <summary>Downloads, verifies, and installs a release.</summary>
 public interface IUpdateInstaller
 {
-    /// <summary>Starts installation of the supplied release.</summary>
-    void Install(UpdateRelease release);
+    /// <summary>Installs the supplied release and returns the installer result.</summary>
+    UpdateInstallResult Install(UpdateRelease release);
 }
 
 /// <summary>Identifies the result of an update check.</summary>
@@ -102,12 +118,12 @@ public enum UpdateCheckOutcome
     NotDue,
     /// <summary>No newer eligible release is available.</summary>
     UpToDate,
-    /// <summary>The available release was previously skipped.</summary>
-    SkippedEarlier,
-    /// <summary>The MSI installer was started.</summary>
-    InstallStarted,
-    /// <summary>The user skipped the offered version.</summary>
-    SkipChosen,
+    /// <summary>A newer installed version needs an Explorer restart.</summary>
+    RestartPending,
+    /// <summary>The MSI installation completed.</summary>
+    InstallCompleted,
+    /// <summary>The user cancelled MSI installation.</summary>
+    InstallCancelled,
     /// <summary>The user deferred the update.</summary>
     LaterChosen,
     /// <summary>The check or installation failed.</summary>

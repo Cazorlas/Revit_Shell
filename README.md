@@ -117,11 +117,11 @@ Behavior:
 
 `Check for updates` checks [GitHub Releases](https://github.com/Cazorlas/Revit_Shell/releases/latest) at once. After a command, the extension checks in the background at most once every 24 hours.
 
-The prompt offers `Update now`, `Skip this version` and `Later`. A skipped version is offered again only by a manual check, or when a newer one appears.
+The prompt offers `Update now` and `Later`. After an update, the new version is used once File Explorer restarts (or you sign out or restart Windows), and `Check for updates` reports the pending restart until then.
 
-The MSI is downloaded to `%TEMP%\PaperEngineerShell\Updates`, and its SHA-256 is checked against the digest GitHub publishes for the asset before `msiexec /i <msi> /passive /norestart` starts. Windows asks for administrator rights and may ask to close File Explorer.
+The MSI is downloaded to `%TEMP%\PaperEngineerShell\Updates`, and its SHA-256 is checked against the digest GitHub publishes for the asset before `msiexec /i <msi> /passive /norestart` starts. Windows asks for administrator rights while it installs.
 
-State is kept in `HKCU\Software\PaperEngineer\Shell` (`LastCheckUtc`, `SkippedVersion`).
+State is kept in `HKCU\Software\PaperEngineer\Shell` (`LastCheckUtc`).
 
 ## Build
 

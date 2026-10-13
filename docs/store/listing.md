@@ -25,7 +25,7 @@ Opens the file in the Revit version that saved it, so a 2023 model never gets up
 - Open directly
 
 **Check for updates**
-PaperEngineer Shell checks GitHub Releases at most once a day and asks before installing. Choose Update now, Skip this version, or Later. Downloads are verified by SHA-256 before the installer runs.
+PaperEngineer Shell checks GitHub Releases at most once a day and asks before installing. Choose `Update now` or `Later`. Downloads are verified by SHA-256 before the installer runs. After an update, the new version is used once File Explorer restarts (or you sign out or restart Windows), and "Check for updates" reports the pending restart until then.
 
 ## Supported versions
 

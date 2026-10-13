@@ -38,7 +38,7 @@ public sealed class UpdateDialog : Form, IUpdatePrompt
         };
         layout.Controls.Add(new Label
         {
-            Text = $"PaperEngineer Shell {release.Version.ToString(3)} is available. You have {current.ToString(3)}.\r\nWindows may ask to close File Explorer while it installs.",
+            Text = $"PaperEngineer Shell {release.Version.ToString(3)} is available. You have {current.ToString(3)}.\r\nWindows asks for administrator rights while it installs.",
             AutoSize = true,
             MaximumSize = new Size(440, 0),
             Margin = new Padding(0, 0, 0, 12)
@@ -62,7 +62,6 @@ public sealed class UpdateDialog : Form, IUpdatePrompt
         };
         layout.Controls.Add(whatsNew);
         layout.Controls.Add(CreateChoiceButton("Update now", UpdatePromptChoice.Install));
-        layout.Controls.Add(CreateChoiceButton("Skip this version", UpdatePromptChoice.Skip));
         var later = CreateChoiceButton("Later", UpdatePromptChoice.Later);
         later.DialogResult = DialogResult.Cancel;
         layout.Controls.Add(later);
@@ -82,6 +81,29 @@ public sealed class UpdateDialog : Form, IUpdatePrompt
     {
         MessageBox.Show(
             $"PaperEngineer Shell {current.ToString(3)} is up to date.",
+            "PaperEngineer Shell update",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+    }
+
+    /// <inheritdoc />
+    public void ShowRestartNeeded(Version installed)
+    {
+        ShowRestartMessage($"PaperEngineer Shell {installed.ToString(3)} is already installed.");
+    }
+
+    /// <inheritdoc />
+    public void ShowInstalled(Version installed)
+    {
+        ShowRestartMessage($"PaperEngineer Shell {installed.ToString(3)} is installed.");
+    }
+
+    private static void ShowRestartMessage(string message)
+    {
+        MessageBox.Show(
+            message + Environment.NewLine +
+            "Restart File Explorer, sign out, or restart Windows to start using it." + Environment.NewLine +
+            "To restart File Explorer: Task Manager > Windows Explorer > Restart.",
             "PaperEngineer Shell update",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
