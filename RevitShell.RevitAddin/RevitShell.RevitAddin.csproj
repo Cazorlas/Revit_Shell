@@ -24,7 +24,7 @@
     <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2025.4.60" ExcludeAssets="runtime" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
-    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2027.0.10" ExcludeAssets="runtime" PrivateAssets="all" />
-    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2027.0.10" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2027.3.0" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2027.3.0" ExcludeAssets="runtime" PrivateAssets="all" />
   </ItemGroup>
 </Project>
